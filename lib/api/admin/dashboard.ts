@@ -15,8 +15,12 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
   }
   try {
     const response = await api.get("/admin/dashboard/stats");
-    cachedStats = response.data.data; // Assuming data is nested under 'data' key
-    return cachedStats;
+    if (!response.data.data) {
+      throw new Error("Dashboard stats data is missing from the API response.");
+    }
+    const stats: DashboardStats = response.data.data; // Enforce type here
+    cachedStats = stats;
+    return stats;
   } catch (error: any) {
     throw error.response?.data?.message || error.message;
   }

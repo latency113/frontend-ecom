@@ -2,14 +2,12 @@
 
 import { getProductById, updateProduct } from "@/lib/api/admin/products";
 import { useToast } from "@/components/ui/Toast/ToastProvider";
-import Image from "next/image";
 import { Product } from "@/types/product";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getAllCategories } from "@/lib/api/admin/categories";
 import { Category } from "@/types/category";
-import { uploadImage } from "@/lib/api/fileUpload";
 
 const AdminProductEditPage = () => {
   const router = useRouter();
@@ -20,7 +18,7 @@ const AdminProductEditPage = () => {
     name: "",
     description: "",
     price: 0,
-    stock: 0, // ADDED default
+    stock: 0,
     imgUrl: "",
     categoryId: "",
   });
@@ -47,7 +45,7 @@ const AdminProductEditPage = () => {
             imgUrl: productData.imgUrl,
             categoryId: productData.categoryId,
           });
-          setImagePreviewUrl(productData.imgUrl);
+          setImagePreviewUrl(productData.imgUrl || null);
         } else {
           showToast("Product not found.", "error");
         }
@@ -70,17 +68,17 @@ const AdminProductEditPage = () => {
   }, [productId, showToast]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
 
-    if (name === "image") {
-      const file = files && files[0];
+    if (e.target instanceof HTMLInputElement && e.target.type === "file") {
+      const file = e.target.files && e.target.files[0];
       if (file) {
         setSelectedFile(file);
         setImagePreviewUrl(URL.createObjectURL(file));
       } else {
         setSelectedFile(null);
         // If file input is cleared, revert preview to existing imgUrl or null
-        setImagePreviewUrl(formData.imgUrl);
+        setImagePreviewUrl(formData.imgUrl || null); // Ensure it can be null
       }
     } else {
       setFormData((prev) => ({

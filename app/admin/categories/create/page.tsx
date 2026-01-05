@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Category } from "@/types/category";
+import { CreateCategoryPayload } from "@/types/category"; // Import CreateCategoryPayload
 import { createCategory } from "@/lib/api/admin/categories";
 import { useToast } from "@/components/ui/Toast/ToastProvider";
 import { ArrowLeft, FolderTree } from "lucide-react";
 
 const AdminCategoryCreatePage = () => {
   const router = useRouter();
-  const [formData, setFormData] = useState<Omit<Category, "id">>({
+  const [formData, setFormData] = useState<CreateCategoryPayload>({
     name: "",
     description: "",
   });

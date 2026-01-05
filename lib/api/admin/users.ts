@@ -1,4 +1,4 @@
-import { User } from "@/types/user";
+import { User, CreateUserPayload } from "@/types/user";
 import api from "../index";
 
 export const getAllUsers = async (
@@ -34,7 +34,7 @@ export const getUserById = async (id: string): Promise<User> => {
   }
 };
 
-export const createUser = async (userData: Omit<User, "id">): Promise<User> => {
+export const createUser = async (userData: CreateUserPayload): Promise<User> => {
   try {
     const response = await api.post("/users", userData);
 

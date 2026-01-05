@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { User } from "@/types/user";
+import { User, CreateUserPayload } from "@/types/user"; // Import CreateUserPayload
 import { createUser } from "@/lib/api/admin/users"; // Will use this for actual API call
 import { useToast } from "@/components/ui/Toast/ToastProvider";
 
 const AdminUserCreatePage = () => {
   const router = useRouter();
-  const [formData, setFormData] = useState<Omit<User, "id">>({
+  const [formData, setFormData] = useState<CreateUserPayload>({
     username: "",
     email: "",
     password: "", // Assuming password will be set on creation
@@ -43,8 +43,6 @@ const AdminUserCreatePage = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">Create New User</h1>
       <form onSubmit={handleSubmit} className="bg-white p-4 rounded-md shadow-none border border-gray-200 max-w-lg mx-auto">
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        {success && <p className="text-green-500 mb-4">{success}</p>}
 
         <div className="mb-4">
           <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">

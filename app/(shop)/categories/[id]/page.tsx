@@ -22,7 +22,7 @@ const CategoryDetailPage = () => {
       try {
         const categoryData = await getCategoryById(categoryId);
         setCategory(categoryData);
-        const productsData = await getProductsByCategoryId(categoryId);
+        const productsData = await getProductsByCategoryId(categoryId, 1, 1000); // Request page 1, limit 1000 products
         setProducts(productsData);
       } catch (err: any) {
         setError(err.toString());

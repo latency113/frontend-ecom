@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation";
 import { Grid2X2, Menu } from "lucide-react";
 import { getAllCategories } from "@/lib/api/categories"; // Import getAllCategories
 import { Category } from "@/types/category"; // Import Category type
+import { User } from "@/types/user"; // Import User type
 
 const Navbar = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [categories, setCategories] = useState<Category[]>([]); // State for categories
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown visibility
   const dropdownRef = useRef<HTMLDivElement>(null); // Ref for click outside logic

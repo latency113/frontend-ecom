@@ -3,16 +3,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Product } from "@/types/product";
+import { Product, CreateProductPayload } from "@/types/product"; // Import CreateProductPayload
 import { createProduct } from "@/lib/api/admin/products";
 import { useToast } from "@/components/ui/Toast/ToastProvider";
 import { getAllCategories } from "@/lib/api/admin/categories";
 import { Category } from "@/types/category";
-import { ArrowLeft, Upload, X, ImageIcon } from "lucide-react";
+import { ArrowLeft, Upload, X, } from "lucide-react";
 
 const AdminProductCreatePage = () => {
   const router = useRouter();
-  const [formData, setFormData] = useState<Omit<Product, "id">>({
+  const [formData, setFormData] = useState<CreateProductPayload>({
     name: "",
     description: "",
     price: 0,

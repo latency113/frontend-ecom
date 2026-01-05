@@ -1,5 +1,5 @@
 // Placeholder for admin category API calls
-import { Category } from "@/types/category";
+import { Category, CreateCategoryPayload } from "@/types/category"; // Import CreateCategoryPayload
 
 import api from "../index";
 
@@ -33,7 +33,7 @@ export const getCategoryById = async (id: string): Promise<Category> => {
   }
 };
 
-export const createCategory = async (categoryData: Omit<Category, "id">): Promise<Category> => {
+export const createCategory = async (categoryData: CreateCategoryPayload): Promise<Category> => {
   try {
     const response = await api.post("/categories", categoryData);
     return response.data.data;

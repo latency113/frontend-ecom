@@ -21,9 +21,9 @@ export const getCategoryById = async (id: string): Promise<Category> => {
   }
 };
 
-export const getProductsByCategoryId = async (categoryId: string): Promise<Product[]> => {
+export const getProductsByCategoryId = async (categoryId: string, page: number = 1, limit: number = 1000): Promise<Product[]> => {
     try {
-      const response = await api.get(`/categories/${categoryId}/products`);
+      const response = await api.get(`/categories/${categoryId}/products?page=${page}&limit=${limit}`);
       console.log("getProductsByCategoryId API response:", response.data); // Debugging line
       return response.data.data;
     } catch (error: any) {

@@ -1,10 +1,9 @@
 import api from "./index";
 import { Order, OrderItem } from "@/types/order";
 
-export const createOrder = async (userId: string, cartItems: { productId: string; quantity: number; price: number }[], address: string): Promise<Order> => {
+export const createOrder = async (userId: string, cartItems: { productId: string; quantity: number; price: number }[], addressId: string): Promise<Order> => {
   try {
-    // userId is already passed via authentication, so remove it from the body payload
-    const response = await api.post(`/orders`, { cartItems: cartItems ?? [], address });
+    const response = await api.post(`/orders`, { cartItems: cartItems ?? [], addressId });
     return response.data.data;
   } catch (error: any) {
     throw error.response?.data?.message || error.message;
@@ -14,7 +13,7 @@ export const createOrder = async (userId: string, cartItems: { productId: string
 export const getOrderById = async (orderId: string): Promise<Order> => {
   try {
     const response = await api.get(`/orders/${orderId}`);
-    return response.data;
+    return response.data.data;
   } catch (error: any) {
     throw error.response?.data?.message || error.message;
   }
@@ -35,7 +34,7 @@ export const cancelOrder = async (orderId: string): Promise<Order> => {
     return response.data.data;
   } catch (error: any) {
 
-    throw error.response?.data?.message || error.message || "Unknown error";
+    throw new Error(error.response?.data?.message || error.message || "Unknown error");
   }
 };
 

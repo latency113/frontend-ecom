@@ -73,7 +73,7 @@ const OrderDetailPage = () => {
       }
       try {
         const data = await getOrderById(orderId);
-        setOrder(data.data);
+        setOrder(data);
       } catch (err: any) {
         setError(err.toString());
       } finally {
@@ -321,7 +321,13 @@ const OrderDetailPage = () => {
                   })}
                 </span>
               </div>
-              <div className="text-sm text-gray-700">{order.address}</div>
+              <div className="text-sm text-gray-700">
+                {order.address.street}
+                {order.address.city ? `, ${order.address.city}` : ''}
+                {order.address.stateProvince ? `, ${order.address.stateProvince}` : ''}
+                {order.address.postalCode ? ` ${order.address.postalCode}` : ''}
+                {order.address.country ? `, ${order.address.country}` : ''}
+              </div>
             </div>
             <div className="flex">
               <div className="flex flex-col mb-2">

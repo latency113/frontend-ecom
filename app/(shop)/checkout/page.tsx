@@ -10,6 +10,7 @@ import Link from "next/link";
 import { getAddressesByUserId } from "@/lib/api/address"; // Import address API
 import { Address } from "@/types/address"; // Import Address type
 import { ShoppingCart } from "lucide-react";
+import { useToast } from "@/components/ui/Toast/ToastProvider"; // Import useToast
 
 const CheckoutPage = () => {
   const [cart, setCart] = useState<Cart | null>(null);
@@ -24,6 +25,7 @@ const CheckoutPage = () => {
   const router = useRouter();
 
   const { user, loading: loadingUser, error: userError } = useUser();
+  const { showToast } = useToast(); // Destructure showToast here
 
   useEffect(() => {
     const fetchCheckoutData = async () => {
@@ -87,24 +89,18 @@ const CheckoutPage = () => {
       if (!selectedAddress) {
         throw new Error("Selected address not found.");
       }
-      const formattedAddress = `${selectedAddress.street}, ${
-        selectedAddress.city
-      }, ${
-        selectedAddress.stateProvince
-          ? selectedAddress.stateProvince + ", "
-          : ""
-      }${selectedAddress.postalCode}, ${selectedAddress.country}`;
-
+      
       const orderItemsPayload = cart.cartItems.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
         price: item.product.price, // Capture current price at the time of order
       }));
+
       const newOrder = await createOrder(
         user.id,
         orderItemsPayload,
-        formattedAddress
-      ); // Pass address
+        selectedAddressId
+      ); // Pass addressId
       console.log("Order placed successfully:", newOrder);
 
       // Clear the cart after successful order
@@ -114,7 +110,9 @@ const CheckoutPage = () => {
       router.push(`/orders/success?orderId=${newOrder.id}`); // Redirect to order success page
     } catch (err: any) {
       console.error("Error placing order:", err);
-      setErrorCart(err.toString());
+      const errorMessage = err.response?.data?.message || err.message || err.toString();
+      showToast(`Error placing order: ${errorMessage}`, "error");
+      setErrorCart(errorMessage);
     } finally {
       setIsProcessingOrder(false);
     }

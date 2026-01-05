@@ -7,6 +7,8 @@ import { Product } from "@/types/product";
 import { Category } from "@/types/category";
 import ProductCard from "@/components/product/ProductCard";
 import { useSearchParams } from "next/navigation"; // Import useSearchParams
+import Link from "next/link";
+import { useRouter } from "next/navigation"; // Add useRouter
 
 const ProductsPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -16,13 +18,13 @@ const ProductsPage = () => {
 
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get("search");
-  const selectedCategoryId = searchParams.get("category"); // Get the 'category' query parameter
+  const router = useRouter(); // Initialize useRouter
 
   useEffect(() => {
     const fetchAllData = async () => {
       try {
         const [productsData, categoriesData] = await Promise.all([
-          getAllProducts(),
+          getAllProducts(1, 100), // Request page 1, limit 100 products for default view
           getAllCategories(),
         ]);
         setProducts(productsData);
@@ -38,16 +40,12 @@ const ProductsPage = () => {
     fetchAllData();
   }, []);
 
-  // Filter products based on search term and selected category
   const productsToProcess = products.filter((product) => {
     const matchesSearchTerm = searchTerm
       ? product.name.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
-    const matchesCategory = selectedCategoryId
-      ? product.categoryId === selectedCategoryId
-      : true;
 
-    return matchesSearchTerm && matchesCategory;
+    return matchesSearchTerm;
   });
 
   const productsByCategory: { [key: string]: Product[] } = {};
@@ -65,26 +63,11 @@ const ProductsPage = () => {
   });
 
   // Determine which categories to display
-  const categoriesToDisplay = selectedCategoryId
-    ? categories.filter((category) => category.id === selectedCategoryId)
-    : categories.filter(
-        (category) =>
-          productsByCategory[category.id] &&
-          productsByCategory[category.id].length > 0
-      );
-
-  // If a specific category is selected but has no products, show all categories that have products.
-  // This handles cases where a search term might filter out all products from a selected category.
-  if (
-    selectedCategoryId &&
-    categoriesToDisplay.length === 0 &&
-    productsToProcess.length > 0
-  ) {
-    // This case means a category was selected, but the search term filtered out all products.
-    // We should probably just show all search-filtered products without category grouping if this happens.
-    // Or just show nothing. For now, let's keep showing only the selected category if it has products.
-    // If it has no products, the map will return null.
-  }
+  const categoriesToDisplay = categories.filter(
+    (category) =>
+      productsByCategory[category.id] &&
+      productsByCategory[category.id].length > 0
+  );
 
   if (loading) {
     return (
@@ -105,43 +88,60 @@ const ProductsPage = () => {
   return (
     <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
       <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-10 tracking-tight">
-        {selectedCategoryId
-          ? categories.find((c) => c.id === selectedCategoryId)?.name ||
-            "Category Products"
-          : "สินค้าทั้งหมด"}
+        สินค้าทั้งหมด
       </h1>
 
       {categoriesToDisplay.map((category) => {
         const categoryProducts = productsByCategory[category.id];
         if (categoryProducts && categoryProducts.length > 0) {
+          const productsToShow = categoryProducts.slice(0, 4); // Limit to 4
+
           return (
             <div key={category.id} className="mb-12">
-              {!selectedCategoryId && ( // Only show category heading if not filtered by a single category
-                <h2 className="text-3xl font-bold text-gray-800 mb-6 border-b-2 border-gray-200 pb-2">
-                  {category.name}
-                </h2>
-              )}
+              <h2 className="text-3xl font-bold text-gray-800 mb-6 border-b-2 border-gray-200 pb-2">
+                {category.name}
+              </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                {categoryProducts.map((product) => (
+                {productsToShow.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
+              {categoryProducts.length > 4 && (
+                <div className="text-center mt-6">
+                  <Link
+                    href={`/category/${category.id}`}
+                    className="inline-block px-6 py-2 border border-gray-900 text-gray-900 text-sm tracking-wide hover:bg-gray-900 hover:text-white transition-colors"
+                  >
+                    ดูสินค้าทั้งหมดใน {category.name} ({categoryProducts.length} ชิ้น)
+                  </Link>
+                </div>
+              )}
             </div>
           );
         }
         return null;
       })}
 
-      {!selectedCategoryId && uncategorizedProducts.length > 0 && (
+      {uncategorizedProducts.length > 0 && (
         <div className="mb-12">
           <h2 className="text-3xl font-bold text-gray-800 mb-6 border-b-2 border-gray-200 pb-2">
             สินค้าอื่น ๆ
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {uncategorizedProducts.map((product) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            {uncategorizedProducts.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
+          {uncategorizedProducts.length > 4 && (
+            <div className="text-center mt-6">
+              <Link
+                href={`/category/uncategorized`} // Assuming 'uncategorized' is a valid category ID or special route
+                className="inline-block px-6 py-2 border border-gray-900 text-gray-900 text-sm tracking-wide hover:bg-gray-900 hover:text-white transition-colors"
+              >
+                ดูสินค้าอื่น ๆ ทั้งหมด ({uncategorizedProducts.length} ชิ้น)
+              </Link>
+            </div>
+          )}
         </div>
       )}
 

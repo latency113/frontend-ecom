@@ -1,9 +1,9 @@
 import api from "./index";
 import { Product } from "@/types/product";
 
-export const getAllProducts = async (): Promise<Product[]> => {
+export const getAllProducts = async (page: number = 1, limit: number = 100): Promise<Product[]> => {
   try {
-    const response = await api.get(`/products`);
+    const response = await api.get(`/products?page=${page}&limit=${limit}`);
     console.log("getAllProducts API response:", response.data); // Debugging line
     return response.data.data;
   } catch (error: any) {
