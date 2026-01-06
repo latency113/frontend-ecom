@@ -156,14 +156,14 @@ const AddressesPage = () => {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
-      <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-10 tracking-tight">
+    <div className="mx-auto">
+      <h1 className="text-3xl sm:text-4xl font-extrabold text-center sm:text-left text-gray-900 mb-8 tracking-tight">
         ที่อยู่สำหรับจัดส่ง
       </h1>
 
       <div className="mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">
             จัดการที่อยู่ของคุณ
           </h2>
           <button
@@ -179,7 +179,7 @@ const AddressesPage = () => {
                     isDefault: false,
                 });
             }}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center"
           >
             <PlusCircle className="w-5 h-5 mr-2" />
             เพิ่มที่อยู่ใหม่
@@ -297,7 +297,7 @@ const AddressesPage = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-green-600 text-white py-2 px-4 rounded-md text-lg font-medium hover:bg-green-700 transition-colors"
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md text-lg font-medium hover:bg-blue-700 transition-colors"
             >
               บันทึกที่อยู่
             </button>
@@ -440,7 +440,7 @@ const AddressesPage = () => {
                     </div>
                     <button
                       type="submit"
-                      className="w-full bg-green-600 text-white py-2 px-4 rounded-md text-lg font-medium hover:bg-green-700 transition-colors"
+                      className="w-full bg-blue-600 text-white py-2 px-4 rounded-md text-lg font-medium hover:bg-blue-700 transition-colors"
                     >
                       บันทึกการแก้ไข
                     </button>

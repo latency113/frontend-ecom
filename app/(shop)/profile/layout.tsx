@@ -50,52 +50,54 @@ export default function ProfileLayout({
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-8">
         {/* Sidebar */}
         <aside className="w-full md:w-64 flex-shrink-0">
-          <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
-            <h3 className="text-sm text-gray-500 mb-3">รายการ</h3>
-            <nav className="space-y-1">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                    pathname === item.href
-                      ? "text-blue-600 bg-blue-50 border-l-4 border-blue-600 -ml-4 pl-5"
-                      : "text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span className="text-sm">{item.label}</span>
-                </Link>
-              ))}
-            </nav>
-          </div>
+          <div className="flex md:flex-col gap-4 overflow-x-auto md:overflow-visible pb-2 md:pb-0 no-scrollbar">
+            <div className="bg-white rounded-lg shadow-sm p-4 min-w-[240px] md:min-w-0 flex-1 md:flex-none">
+              <h3 className="text-sm text-gray-500 mb-3 font-medium">รายการ</h3>
+              <nav className="space-y-1">
+                {menuItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                      pathname === item.href
+                        ? "text-blue-600 bg-blue-50 border-l-4 border-blue-600 -ml-4 pl-5"
+                        : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span className="text-sm">{item.label}</span>
+                  </Link>
+                ))}
+              </nav>
+            </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <h3 className="text-sm text-gray-500 mb-3">บัญชี</h3>
-            <nav className="space-y-1">
-              {accountItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                    pathname === item.href
-                      ? "text-blue-600 bg-blue-50 border-l-4 border-blue-600 -ml-4 pl-5"
-                      : "text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span className="text-sm">{item.label}</span>
-                </Link>
-              ))}
-            </nav>
+            <div className="bg-white rounded-lg shadow-sm p-4 min-w-[240px] md:min-w-0 flex-1 md:flex-none">
+              <h3 className="text-sm text-gray-500 mb-3 font-medium">บัญชี</h3>
+              <nav className="space-y-1">
+                {accountItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+                      pathname === item.href
+                        ? "text-blue-600 bg-blue-50 border-l-4 border-blue-600 -ml-4 pl-5"
+                        : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span className="text-sm">{item.label}</span>
+                  </Link>
+                ))}
+              </nav>
+            </div>
           </div>
         </aside>
 
         {/* Page Content */}
-        <main className="flex-grow">{children}</main>
+        <main className="flex-grow min-w-0">{children}</main>
       </div>
     </div>
   );

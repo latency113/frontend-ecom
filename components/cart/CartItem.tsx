@@ -12,21 +12,39 @@ interface CartItemProps {
 
 const CartItem = ({ item, onUpdateQuantity, onRemoveItem }: CartItemProps) => {
   return (
-    <div className="flex items-center space-x-4 p-4 bg-white rounded-lg shadow-md border border-gray-200">
-      <div className="flex-shrink-0">
-        {item.product.imgUrl && (
-          <img
-            src={item.product.imgUrl}
-            alt={item.product.name}
-            width={96} // Increased size slightly
-            height={96} // Increased size slightly
-            className="rounded-lg object-cover aspect-square"
-          />
-        )}
+    <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-white rounded-lg shadow-md border border-gray-200">
+      <div className="flex items-center gap-4 w-full sm:w-auto">
+        <div className="flex-shrink-0">
+          {item.product.imgUrl && (
+            <img
+              src={item.product.imgUrl}
+              alt={item.product.name}
+              width={80} 
+              height={80} 
+              className="rounded-lg object-cover aspect-square w-20 h-20 sm:w-24 sm:h-24"
+            />
+          )}
+        </div>
+        <div className="flex-grow sm:hidden">
+            <Link href={`/products/${item.product.id}`}>
+            <h3 className="font-bold text-base text-gray-800 line-clamp-2">
+                {item.product.name}
+            </h3>
+            </Link>
+            <p className="text-gray-600 font-medium text-sm">
+            {item.product.price.toLocaleString("th-TH", {
+                style: "currency",
+                currency: "thb",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            })}
+            </p>
+        </div>
       </div>
-      <div className="flex-grow">
+      
+      <div className="hidden sm:block flex-grow">
         <Link href={`/products/${item.product.id}`}>
-          <h3 className="font-bold text-lg text-gray-800">
+          <h3 className="font-bold text-lg text-gray-800 line-clamp-2">
             {item.product.name}
           </h3>
         </Link>
@@ -40,23 +58,24 @@ const CartItem = ({ item, onUpdateQuantity, onRemoveItem }: CartItemProps) => {
           บาท
         </p>
       </div>
-      <div className="flex items-center space-x-4 ml-auto">
+
+      <div className="flex items-center justify-between w-full sm:w-auto gap-4 sm:gap-6 sm:ml-auto border-t sm:border-t-0 pt-4 sm:pt-0">
         {/* Quantity Selector UI */}
         <div className="flex items-center border border-gray-300 rounded-md">
           <button
             onClick={() =>
               onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))
             }
-            className="p-2 disabled:opacity-50 text-gray-600 hover:text-gray-900"
+            className="p-1 sm:p-2 disabled:opacity-50 text-gray-600 hover:text-gray-900"
             disabled={item.quantity <= 1}
           >
-            <Minus className="w-5 h-5" />
+            <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
           <input
             type="text"
             readOnly
             value={item.quantity}
-            className="w-12 p-2 text-center border-l border-r border-gray-300 outline-none"
+            className="w-8 sm:w-12 p-1 sm:p-2 text-center border-l border-r border-gray-300 outline-none text-sm"
           />
           <button
             onClick={() =>
@@ -65,28 +84,30 @@ const CartItem = ({ item, onUpdateQuantity, onRemoveItem }: CartItemProps) => {
                 Math.min(item.product.stock, item.quantity + 1)
               )
             }
-            className="p-2 disabled:opacity-50 text-gray-600 hover:text-gray-900"
+            className="p-1 sm:p-2 disabled:opacity-50 text-gray-600 hover:text-gray-900"
             disabled={item.quantity >= item.product.stock}
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
         {/* End Quantity Selector UI */}
 
-        <p className="font-bold text-lg text-gray-800 truncate">
-          {(item.quantity * item.product.price).toLocaleString("th-TH", {
-            style: "currency",
-            currency: "thb",
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          })}
-        </p>
-        <button
-          onClick={() => onRemoveItem(item.id)}
-          className="text-red-600 hover:text-red-800 text-md font-medium transition-colors cursor-pointer"
-        >
-          <Trash />
-        </button>
+        <div className="flex items-center gap-4">
+            <p className="font-bold text-lg text-gray-800 truncate min-w-[80px] text-right">
+            {(item.quantity * item.product.price).toLocaleString("th-TH", {
+                style: "currency",
+                currency: "thb",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            })}
+            </p>
+            <button
+            onClick={() => onRemoveItem(item.id)}
+            className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors cursor-pointer"
+            >
+            <Trash className="w-5 h-5" />
+            </button>
+        </div>
       </div>
     </div>
   );

@@ -49,12 +49,12 @@ export default function ProfileLayout({
   ];
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
-      <div className="flex flex-col md:flex-row gap-8">
+    <div className="container mx-auto py-0 md:py-8 px-0 md:px-6 lg:px-8">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-8">
         {/* Sidebar */}
-        <aside className="w-full md:w-64 flex-shrink-0">
+        <aside className="hidden md:block w-64 flex-shrink-0">
           <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
-            <h3 className="text-sm text-gray-500 mb-3">รายการ</h3>
+            <h3 className="text-sm text-gray-500 mb-3 font-medium">รายการ</h3>
             <nav className="space-y-1">
               {menuItems.map((item) => (
                 <Link
@@ -74,7 +74,7 @@ export default function ProfileLayout({
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-4">
-            <h3 className="text-sm text-gray-500 mb-3">บัญชี</h3>
+            <h3 className="text-sm text-gray-500 mb-3 font-medium">บัญชี</h3>
             <nav className="space-y-1">
               {accountItems.map((item) => (
                 <Link
@@ -95,7 +95,7 @@ export default function ProfileLayout({
         </aside>
 
         {/* Page Content */}
-        <main className="flex-grow">{children}</main>
+        <main className="flex-grow min-w-0">{children}</main>
       </div>
     </div>
   );

@@ -173,7 +173,7 @@ const CheckoutPage = () => {
       </h1>
 
       <div className="lg:flex lg:space-x-8">
-        <div className="lg:w-2/3 bg-white p-8 rounded-lg shadow-xl border border-gray-100">
+        <div className="lg:w-2/3 bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-xl border border-gray-100">
           <h2 className="text-2xl font-extrabold text-gray-900 mb-6">
             สินค้าในตะกร้า
           </h2>
@@ -208,7 +208,7 @@ const CheckoutPage = () => {
           </div>
         </div>
 
-        <div className="lg:w-1/3 bg-white p-8 rounded-lg shadow-xl border border-gray-100 mt-8 lg:mt-0">
+        <div className="lg:w-1/3 bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-xl border border-gray-100 mt-8 lg:mt-0">
           <h2 className="text-2xl font-extrabold text-gray-900 mb-6">
             ข้อมูลการชำระเงินและที่อยู่จัดส่ง
           </h2>

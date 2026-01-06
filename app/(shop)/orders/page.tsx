@@ -5,7 +5,7 @@ import Link from "next/link";
 import { getAllOrders, cancelOrder } from "@/lib/api/orders";
 import { Order } from "@/types/order";
 import { useUser } from "@/lib/context/UserContext";
-import { ShoppingCart, Search, Store } from "lucide-react";
+import { ShoppingCart, Search, Store, ArrowLeft } from "lucide-react";
 import Swal from "sweetalert2";
 
 const statusConfig = {
@@ -177,15 +177,23 @@ const OrdersPage = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
+      {/* Mobile Back Button & Header */}
+      <div className="bg-white border-b border-gray-200 p-4 md:hidden sticky top-0 z-20 flex items-center gap-3">
+        <Link href="/profile" className="text-gray-600 hover:text-gray-900">
+          <ArrowLeft className="w-6 h-6" />
+        </Link>
+        <h1 className="text-lg font-semibold text-gray-900">รายการคำสั่งซื้อ</h1>
+      </div>
+
       {/* Tabs */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <div className="bg-white border-b border-gray-200 sticky md:top-0 top-[60px] z-10">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-8 overflow-x-auto">
+          <div className="flex items-center gap-8 overflow-x-auto no-scrollbar py-2">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 text-sm whitespace-nowrap relative ${
+                className={`py-3 text-sm whitespace-nowrap relative flex-shrink-0 ${
                   activeTab === tab.id
                     ? "text-blue-600 font-medium"
                     : "text-gray-600 hover:text-gray-900"
@@ -254,30 +262,49 @@ const OrdersPage = () => {
               <div className="p-4">
                 <Link href={`/orders/detail/${order.id}`}>
                   {order.items?.map((item) => (
-                    <div key={item.id} className="flex gap-4 mb-4 last:mb-0">
-                      <div className="w-20 h-20 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center">
-                        <img src={item.product.imgUrl} />
+                    <div key={item.id} className="flex flex-col sm:flex-row gap-4 mb-4 last:mb-0 border-b border-gray-50 pb-4 last:border-0 last:pb-0">
+                      <div className="flex gap-4">
+                         <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center overflow-hidden">
+                          <img src={item.product.imgUrl} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 sm:hidden"> {/* Mobile view for title/price */}
+                            <h3 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2">
+                              {item.product.name}
+                            </h3>
+                             <p className="text-xs text-gray-500 mb-1">x{item.quantity}</p>
+                              <p className="text-sm font-medium text-gray-900">
+                                {item.price.toLocaleString("th-TH", {
+                                  style: "currency",
+                                  currency: "thb",
+                                  minimumFractionDigits: 0,
+                                  maximumFractionDigits: 0,
+                                })}
+                              </p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="text-sm text-gray-900 mb-1">
-                          {item.product.name}
-                        </h3>
-                        <p className="text-xs text-gray-500">
-                          ตัวเลือกสินค้า: {item.product.id.substring(0, 8)}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          x{item.quantity}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">
-                          {item.price.toLocaleString("th-TH", {
-                            style: "currency",
-                            currency: "thb",
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0,
-                          })}
-                        </p>
+                      
+                      <div className="hidden sm:flex flex-1 justify-between items-start">
+                        <div>
+                          <h3 className="text-sm text-gray-900 mb-1 line-clamp-2">
+                            {item.product.name}
+                          </h3>
+                          <p className="text-xs text-gray-500">
+                            ตัวเลือกสินค้า: {item.product.id.substring(0, 8)}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            x{item.quantity}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-gray-900">
+                            {item.price.toLocaleString("th-TH", {
+                              style: "currency",
+                              currency: "thb",
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            })}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   ))}{" "}

@@ -9,6 +9,7 @@ interface UserContextType {
   error: string | null;
   loginUser: (userData: User, token: string) => void;
   logoutUser: () => void;
+  updateUser: (userData: User) => void; // Add updateUser
 }
 
 // Create the context with a default null value
@@ -33,6 +34,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
   }, []);
 
+  const updateUser = useCallback((userData: User) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
+  }, []);
+
   useEffect(() => {
     const initializeUser = () => {
       try {
@@ -40,7 +46,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         const storedToken = localStorage.getItem("token");
 
         if (storedUser && storedToken) {
-          const userData: User = JSON.parse(storedUser);
+          let userData = JSON.parse(storedUser);
+          // Fix for corrupted data from previous bug where whole response was saved
+          if (userData.data && userData.data.id) {
+            userData = userData.data;
+            localStorage.setItem("user", JSON.stringify(userData));
+          }
           setUser(userData);
         }
       } catch (err: any) {
@@ -74,7 +85,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, [logoutUser]);
 
   return (
-    <UserContext.Provider value={{ user, loading, error, loginUser, logoutUser }}>
+    <UserContext.Provider value={{ user, loading, error, loginUser, logoutUser, updateUser }}>
       {children}
     </UserContext.Provider>
   );

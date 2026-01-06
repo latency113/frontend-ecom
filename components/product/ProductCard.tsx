@@ -59,51 +59,60 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <Link href={`/products/${product.id}`} className="block">
-      <div className="bg-white border border-gray-200 rounded-lg shadow-md p-5 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-        <div className="w-full h-48 mb-4 overflow-hidden rounded-md">
+    <Link href={`/products/${product.id}`} className="block h-full">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-3 sm:p-5 hover:shadow-md transition-all duration-300 flex flex-col h-full">
+        {/* Image Container */}
+        <div className="relative w-full aspect-square mb-3 overflow-hidden rounded-md bg-gray-50">
           {product.imgUrl ? (
             <img
               src={product.imgUrl}
               alt={product.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           ) : (
-            <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-500 text-sm">
+            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
               No Image
             </div>
           )}
         </div>
-        <h3 className="text-md font-semibold text-gray-800 mb-1 h-12 overflow-hidden">
-          {product.name}
-        </h3>
-        <p className="text-sm text-gray-600 h-10 overflow-hidden mb-2">
-          {product.description.length > 60
-            ? product.description.slice(0, 60) + "..."
-            : product.description}
-        </p>
-        <p className="text-lg font-bold text-blue-600 mb-4"> {/* Adjusted margin-bottom */}
-          {product.price.toLocaleString("th-TH", {
-            currency: "thb",
-            style: "currency",
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          })}
-        </p>
-        {product.stock > 0 ? (
-          <button
-            onClick={handleAddToCart}
-            disabled={addToCartLoading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            <ShoppingCart className="w-4 h-4" />
-            {addToCartLoading ? "Adding..." : "เพิ่มลงตะกร้า"}
-          </button>
-        ) : (
-          <p className="text-red-500 text-sm font-medium text-center py-2 px-4 border border-red-300 bg-red-50 rounded-md">
-            สินค้าหมด
+
+        {/* Product Info */}
+        <div className="flex flex-col flex-grow">
+          <h3 className="text-sm sm:text-base font-semibold text-gray-800 mb-1 line-clamp-2 h-10 sm:h-12">
+            {product.name}
+          </h3>
+          <p className="text-xs sm:text-sm text-gray-500 mb-2 line-clamp-2 h-8 sm:h-10">
+            {product.description}
           </p>
-        )}
+          
+          <div className="mt-auto">
+            <p className="text-base sm:text-lg font-bold text-blue-600 mb-3">
+              {product.price.toLocaleString("th-TH", {
+                currency: "thb",
+                style: "currency",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })}
+            </p>
+
+            {product.stock > 0 ? (
+              <button
+                onClick={handleAddToCart}
+                disabled={addToCartLoading}
+                className="w-full bg-blue-600 text-white py-1.5 sm:py-2 px-2 rounded-md text-xs sm:text-sm font-medium hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 flex items-center justify-center gap-1 sm:gap-2"
+              >
+                <ShoppingCart className="w-3.5 h-3.5 sm:w-4 h-4" />
+                <span className="truncate">
+                  {addToCartLoading ? "Adding..." : "เพิ่มลงตะกร้า"}
+                </span>
+              </button>
+            ) : (
+              <p className="text-red-500 text-xs sm:text-sm font-medium text-center py-1.5 sm:py-2 px-2 border border-red-200 bg-red-50 rounded-md">
+                สินค้าหมด
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     </Link>
   );

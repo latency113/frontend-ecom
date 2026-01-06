@@ -200,63 +200,66 @@ const OrderDetailPage = () => {
 
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         {/* Progress Steps */}
-        <div className="bg-white rounded-lg p-6 mb-4">
-          <div className="relative mb-8">
-            {/* Background line */}
-            <div
-              className="absolute top-6 left-0 right-0 h-0.5 bg-gray-300"
-              style={{
-                left: `calc(50% / ${dynamicSteps.length})`,
-                right: `calc(50% / ${dynamicSteps.length})`,
-              }}
-            />
+        <div className="bg-white rounded-lg p-6 mb-4 overflow-hidden">
+          <div className="relative mb-8 overflow-x-auto pb-4 no-scrollbar">
+            {/* Background line container to ensure min-width */}
+            <div className="min-w-[500px] relative"> 
+              {/* Background line */}
+              <div
+                className="absolute top-6 left-0 right-0 h-0.5 bg-gray-300"
+                style={{
+                  left: `calc(50% / ${dynamicSteps.length})`,
+                  right: `calc(50% / ${dynamicSteps.length})`,
+                }}
+              />
 
-            {/* Active line overlay */}
-            <div
-              className="absolute top-6 left-0 h-0.5 bg-green-500 transition-all duration-500"
-              style={{
-                left: `calc(50% / ${dynamicSteps.length})`,
-                width: `calc((100% - 100% / ${
-                  dynamicSteps.length
-                } * 2) * ${actualCurrentStepIndex} / ${
-                  dynamicSteps.length - 1
-                })`,
-              }}
-            />
+              {/* Active line overlay */}
+              <div
+                className="absolute top-6 left-0 h-0.5 bg-green-500 transition-all duration-500"
+                style={{
+                  left: `calc(50% / ${dynamicSteps.length})`,
+                  width: `calc((100% - 100% / ${
+                    dynamicSteps.length
+                  } * 2) * ${actualCurrentStepIndex} / ${
+                    dynamicSteps.length - 1
+                  })`,
+                }}
+              />
 
-            <div className="flex items-start justify-between relative">
-              {dynamicSteps.map((step, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col items-center relative"
-                  style={{ flex: 1 }}
-                >
-                  {/* Circle icon */}
+              <div className="flex items-start justify-between relative">
+                {dynamicSteps.map((step, index) => (
                   <div
-                    className={`relative z-10 w-12 h-12 rounded-full flex items-center justify-center mb-2 ${
-                      index <= actualCurrentStepIndex
-                        ? "bg-green-500 text-white"
-                        : "bg-gray-200 text-gray-400"
-                    }`}
+                    key={index}
+                    className="flex flex-col items-center relative"
+                    style={{ flex: 1 }}
                   >
-                    <step.icon className="w-6 h-6" />
-                  </div>
+                    {/* Circle icon */}
+                    <div
+                      className={`relative z-10 w-12 h-12 rounded-full flex items-center justify-center mb-2 flex-shrink-0 ${
+                        index <= actualCurrentStepIndex
+                          ? "bg-green-500 text-white"
+                          : "bg-gray-200 text-gray-400"
+                      }`}
+                    >
+                      <step.icon className="w-6 h-6" />
+                    </div>
 
-                  {/* Label */}
-                  <p
-                    className={`text-xs text-center max-w-[120px] ${
-                      index <= actualCurrentStepIndex
-                        ? "text-gray-900 font-medium"
-                        : "text-gray-500"
-                    }`}
-                  >
-                    {step.label}
-                  </p>
-                  {step.date && (
-                    <p className="text-xs text-gray-400 mt-1">{step.date}</p>
-                  )}
-                </div>
-              ))}
+                    {/* Label */}
+                    <p
+                      className={`text-xs text-center max-w-[100px] sm:max-w-[120px] ${
+                        index <= actualCurrentStepIndex
+                          ? "text-gray-900 font-medium"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {step.label}
+                    </p>
+                    {step.date && (
+                      <p className="text-xs text-gray-400 mt-1 whitespace-nowrap">{step.date}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 

@@ -170,24 +170,25 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
-      <div className="flex flex-col md:flex-row gap-8 mb-12 p-8">
-        <div className="md:w-1/2 flex items-center justify-center">
+      <div className="flex flex-col md:flex-row gap-8 mb-12">
+        <div className="md:w-1/2 flex items-center justify-center bg-gray-50 rounded-lg p-4">
           <img
             src={product.imgUrl}
             alt={product.name}
-            className="w-full h-96 object-contain rounded-md shadow-lg border border-gray-200 p-4"
+            className="w-full h-64 md:h-96 object-contain rounded-md"
           />
         </div>
-        <div className="md:w-1/2">
-          <h1 className="text-xl font-extrabold text-gray-900 leading-tight">
+        <div className="md:w-1/2 flex flex-col justify-center">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-4">
             {product.name}
           </h1>
-          <p className="text-lg text-gray-700 leading-relaxed mt-2">
-            รายละเอียดสินค้า:
-            <span className="flex">{product.description}</span>
-          </p>
-          <hr className="my-6" />
-          <p className="text-xl font-bold text-blue-600 mb-4"> {/* Changed mb-6 to mb-4 to make space for quantity selector */}
+          <div className="prose prose-sm text-gray-700 leading-relaxed mb-6">
+            <span className="font-semibold block mb-2">รายละเอียดสินค้า:</span>
+            {product.description}
+          </div>
+          
+          <div className="flex items-baseline gap-4 mb-6">
+             <p className="text-3xl font-bold text-blue-600">
             {product.price.toLocaleString("th-TH", {
               currency: "thb",
               style: "currency",
@@ -195,13 +196,20 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
               maximumFractionDigits: 0,
             })}
           </p>
+            {/* {product.stock > 0 ? (
+                <span className="text-sm text-green-600 font-medium bg-green-50 px-2 py-1 rounded">มีสินค้า ({product.stock})</span>
+            ) : (
+                 <span className="text-sm text-red-600 font-medium bg-red-50 px-2 py-1 rounded">สินค้าหมด</span>
+            )} */}
+          </div>
+         
 
-          <div className="flex items-center gap-4 mb-6"> {/* New div for quantity selector and button */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6"> {/* New div for quantity selector and button */}
             {/* Quantity Selector UI */}
-            <div className="flex items-center border border-gray-300 rounded-md">
+            <div className="flex items-center border border-gray-300 rounded-md bg-white">
               <button
                 onClick={() => handleQuantityChange('decrement')}
-                className="p-2 disabled:opacity-50 text-gray-600 hover:text-gray-900"
+                className="p-3 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-l-md disabled:opacity-50"
                 disabled={selectedQuantity <= 1 || addToCartLoading}
               >
                 <Minus className="w-5 h-5" />
@@ -210,11 +218,11 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
                 type="text" // Change to text as it's read-only
                 readOnly
                 value={selectedQuantity}
-                className="w-12 p-2 text-center border-l border-r border-gray-300 outline-none"
+                className="w-12 p-2 text-center border-l border-r border-gray-300 outline-none text-gray-900 font-medium"
               />
               <button
                 onClick={() => handleQuantityChange('increment')}
-                className="p-2 disabled:opacity-50 text-gray-600 hover:text-gray-900"
+                className="p-3 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-r-md disabled:opacity-50"
                 disabled={selectedQuantity >= (product.stock || 0) || addToCartLoading}
               >
                 <Plus className="w-5 h-5" />
@@ -225,16 +233,11 @@ const ProductDetail = ({ productId }: ProductDetailProps) => {
             <button
               onClick={handleAddToCart}
               disabled={addToCartLoading || product.stock === 0 || selectedQuantity === 0} // Disable if adding, out of stock, or quantity is 0
-              className="bg-blue-600 text-white py-2 px-4 border border-transparent rounded-md shadow-lg text-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50"
+              className="w-full sm:w-auto bg-blue-600 text-white py-3 px-8 border border-transparent rounded-md shadow-lg text-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              <p className="flex">
-                <ShoppingCart className="inline mr-2" /> {addToCartLoading ? "Adding..." : "เพิ่มลงตะกร้า"}
-              </p>
+                <ShoppingCart className="w-5 h-5" /> {addToCartLoading ? "Adding..." : "เพิ่มลงตะกร้า"}
             </button>
           </div>
-          {product.stock === 0 && (
-            <p className="text-red-500 text-sm mt-2">สินค้าหมด</p>
-          )}
         </div>
       </div>
       <div className="mt-16">

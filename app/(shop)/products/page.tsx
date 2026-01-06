@@ -101,7 +101,7 @@ const ProductsPage = () => {
               <h2 className="text-3xl font-bold text-gray-800 mb-6 border-b-2 border-gray-200 pb-2">
                 {category.name}
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
                 {productsToShow.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -127,7 +127,7 @@ const ProductsPage = () => {
           <h2 className="text-3xl font-bold text-gray-800 mb-6 border-b-2 border-gray-200 pb-2">
             สินค้าอื่น ๆ
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
             {uncategorizedProducts.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

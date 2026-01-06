@@ -58,19 +58,34 @@ const Header = () => {
     <header className="bg-white border-b border-gray-200 sticky top-0 left-0 right-0 z-50">
       {/* Top Bar */}
       <div className="border-b border-gray-100">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="text-2xl text-blue-500 font-bold tracking-tight">
-            IT Life Store
-          </Link>
+        <div className="container mx-auto px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          {/* Logo & Icons Row for Mobile */}
+          <div className="flex items-center justify-between w-full md:w-auto">
+            <Link href="/" className="text-2xl text-blue-500 font-bold tracking-tight">
+              IT Life Store
+            </Link>
+
+            {/* Mobile Icons (Visible on mobile, hidden on desktop if you want, but here we keep them together or split) */}
+            {/* Actually, let's keep the original structure but adapt flex order */}
+            <div className="flex items-center gap-4 md:hidden">
+               <Link href="/profile" className="text-gray-700 hover:text-gray-900">
+                <User className="w-6 h-6" />
+              </Link>
+              {(loadingUser || loadingCart) ? (
+                <div className="w-6 h-6 bg-gray-200 rounded-full animate-pulse"></div>
+              ) : (
+                <CartIcon itemCount={cartItemCount} />
+              )}
+            </div>
+          </div>
 
           {/* Search Bar */}
-          <div className="flex-1 max-w-2xl mx-8">
+          <div className="flex-1 w-full md:max-w-2xl md:mx-8">
             <SearchInput />
           </div>
 
-          {/* Icons */}
-          <div className="flex items-center gap-6">
+          {/* Desktop Icons */}
+          <div className="hidden md:flex items-center gap-6">
             <Link href="/profile" className="text-gray-700 hover:text-gray-900">
               <User className="w-6 h-6" />
             </Link>
@@ -84,7 +99,7 @@ const Header = () => {
       </div>
 
       {/* Navigation Bar */}
-      <div className="container mx-auto px-6 py-3">
+      <div className="container mx-auto px-4 md:px-6 py-3">
         <Navbar />
       </div>
     </header>
