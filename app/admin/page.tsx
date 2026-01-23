@@ -1,5 +1,5 @@
 "use client"
-import { Package, FolderTree, ShoppingBag, Users, ArrowRight } from "lucide-react";
+import { Package, FolderTree, ShoppingBag, Users, ArrowRight, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
@@ -42,6 +42,13 @@ const AdminDashboardPage = () => {
 
   const menuItems = [
     {
+      title: "รายงานสรุป",
+      description: "ดูรายได้ รายจ่าย และสรุปผลการดำเนินงาน",
+      href: "/admin/reports",
+      icon: BarChart3,
+      color: "bg-red-50 text-red-600",
+    },
+    {
       title: "จัดการสินค้า",
       description: "ดู เพิ่ม แก้ไข และลบสินค้า",
       href: "/admin/products",
@@ -77,7 +84,7 @@ const AdminDashboardPage = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-gray-900 mb-2">
-            Admin Dashboard
+            Admin Panel
           </h1>
           <p className="text-gray-600">จัดการระบบร้านค้าของคุณ</p>
         </div>

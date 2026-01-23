@@ -7,7 +7,8 @@ import {
   Package, 
   FolderTree, 
   ShoppingCart, 
-  Users 
+  Users,
+  BarChart3 
 } from "lucide-react";
 
 const AdminSidebar = () => {
@@ -18,6 +19,11 @@ const AdminSidebar = () => {
       name: "หน้าแรก", 
       href: "/admin", 
       icon: LayoutDashboard 
+    },
+    { 
+      name: "รายงานสรุป", 
+      href: "/admin/reports", 
+      icon: BarChart3 
     },
     { 
       name: "จัดการสินค้า", 

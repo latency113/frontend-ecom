@@ -9,7 +9,9 @@ const ReviewCard = ({ review }: ReviewCardProps) => {
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-md">
       <div className="flex items-center mb-2">
-        <p className="font-bold text-lg text-gray-800 mr-3">{review.userName || "Anonymous"}</p>
+        <p className="font-bold text-lg text-gray-800 mr-3">
+          {review.user?.username || review.userName || "Anonymous"}
+        </p>
         <div className="flex">
           {[...Array(5)].map((_, i) => (
             <FaStar

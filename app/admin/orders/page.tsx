@@ -252,7 +252,7 @@ const AdminOrderListPage = () => {
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <p className="text-xs text-gray-500 mb-1">ทั้งหมด</p>
             <p className="text-xl font-semibold text-gray-900">
-              {orders.length}
+              {backendTotalCount}
             </p>
           </div>
           <div className="bg-white rounded-lg border border-gray-200 p-4">

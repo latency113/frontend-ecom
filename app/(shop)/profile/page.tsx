@@ -1,11 +1,33 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useUser } from "@/lib/context/UserContext";
 import { LogIn, User,  } from "lucide-react";
+import { Order } from "@/types/order";
+import { getAllOrders } from "@/lib/api/orders";
 
 const ProfilePage = () => {
   const { user, loading: loadingUser, error: userError } = useUser();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (user?.id) {
+        setLoadingOrders(true);
+        try {
+          const data = await getAllOrders(user.id);
+          setOrders(data);
+        } catch (error) {
+          console.error("Error fetching orders:", error);
+        } finally {
+          setLoadingOrders(false);
+        }
+      }
+    };
+    fetchOrders();
+  }, [user?.id]);
 
   if (loadingUser) {
     return (
@@ -40,6 +62,12 @@ const ProfilePage = () => {
     );
   }
 
+  const deliveredCount = orders.filter((o) => o.status === "DELIVERED").length;
+  const pendingCount = orders.filter((o) => o.status === "PENDING").length;
+  const inProgressCount = orders.filter(
+    (o) => o.status === "PROCESSING" || o.status === "SHIPPED"
+  ).length;
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -65,19 +93,27 @@ const ProfilePage = () => {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
             <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <div className="text-lg sm:text-2xl font-bold text-blue-600">0</div>
-              <div className="text-[10px] sm:text-sm text-gray-500 uppercase tracking-wider">เลิร์จสิน</div>
+              <div className="text-lg sm:text-2xl font-bold text-blue-600">
+                {orders.length}
+              </div>
+              <div className="text-[10px] sm:text-sm text-gray-500 uppercase tracking-wider">ออเดอร์ทั้งหมด</div>
             </div>
             <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <div className="text-lg sm:text-2xl font-bold text-blue-600">0</div>
+              <div className="text-lg sm:text-2xl font-bold text-blue-600">
+                {deliveredCount}
+              </div>
               <div className="text-[10px] sm:text-sm text-gray-500 uppercase tracking-wider">จัดส่งแล้ว</div>
             </div>
             <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <div className="text-lg sm:text-2xl font-bold text-blue-600">0</div>
+              <div className="text-lg sm:text-2xl font-bold text-blue-600">
+                {inProgressCount}
+              </div>
               <div className="text-[10px] sm:text-sm text-gray-500 uppercase tracking-wider">รอดำเนินการ</div>
             </div>
             <div className="bg-gray-50 rounded-lg p-3 text-center">
-              <div className="text-lg sm:text-2xl font-bold text-blue-600">0</div>
+              <div className="text-lg sm:text-2xl font-bold text-blue-600">
+                {pendingCount}
+              </div>
               <div className="text-[10px] sm:text-sm text-gray-500 uppercase tracking-wider">รอชำระเงิน</div>
             </div>
           </div>

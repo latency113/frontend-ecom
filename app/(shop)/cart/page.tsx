@@ -94,7 +94,7 @@ const CartPage = () => {
   if (loadingUser || loadingCart) {
     return (
       <div className="text-center py-20 text-gray-600 text-lg">
-        Loading cart...
+        กำลังโหลดตะกร้าสินค้า...
       </div>
     );
   }
@@ -102,7 +102,7 @@ const CartPage = () => {
   if (userError || errorCart) {
     return (
       <div className="text-center py-20 text-red-500 text-lg">
-        Error: {userError || errorCart}
+        เกิดข้อผิดพลาด: {userError || errorCart}
       </div>
     );
   }
@@ -159,7 +159,7 @@ const CartPage = () => {
             สรุปคำสั่งซื้อ
           </h2>
           <div className="flex justify-between text-base text-gray-700 mb-2">
-            <span>ยอดทั้งหมด:</span>
+            <span>ยอดรวมสินค้า:</span>
             <span>
               {calculateTotal().toLocaleString("th-TH", {
                 style: "currency",
@@ -171,7 +171,7 @@ const CartPage = () => {
             </span>
           </div>
           <div className="flex justify-between text-xl font-semibold text-gray-900 border-t pt-4 mt-4">
-            <span>สรุปยอดทั้งหมด:</span>
+            <span>ยอดสุทธิ:</span>
             <span>
               {calculateTotal().toLocaleString("th-TH", {
                 style: "currency",

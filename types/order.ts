@@ -17,7 +17,9 @@ export interface Order {
   user: User; // Add user object
   items: OrderItem[];
   totalAmount: number;
-  address: Address
+  address: string;
+  paymentMethod: string;
+  paymentSlip?: string | null;
   status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
   createdAt: string;
   updatedAt: string;

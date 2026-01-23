@@ -47,6 +47,27 @@ export const getTotalUsers = async (): Promise<number> => {
 };
 
 // Function to clear cached stats, useful for re-fetching data when needed
+
 export const clearCachedDashboardStats = () => {
+
   cachedStats = null;
+
+};
+
+
+
+export const getRevenueReport = async () => {
+
+  try {
+
+    const response = await api.get("/admin/dashboard/revenue");
+
+    return response.data.data;
+
+  } catch (error: any) {
+
+    throw error.response?.data?.message || error.message;
+
+  }
+
 };

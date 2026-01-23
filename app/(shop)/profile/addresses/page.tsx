@@ -82,10 +82,10 @@ const AddressesPage = () => {
         isDefault: false,
       });
       setShowAddForm(false);
-      showToast("Address added successfully!", "success");
+      showToast("เพิ่มที่อยู่ใหม่สำเร็จ!", "success");
       fetchAddresses(); // Re-fetch to ensure default status is correct
     } catch (err: any) {
-      showToast(`Error adding address: ${err.toString()}`, "error");
+      showToast(`เกิดข้อผิดพลาดในการเพิ่มที่อยู่: ${err.toString()}`, "error");
     }
   };
 
@@ -99,31 +99,32 @@ const AddressesPage = () => {
         prev.map((addr) => (addr.id === updatedAddress.id ? updatedAddress : addr))
       );
       setShowEditForm(null);
-      showToast("Address updated successfully!", "success");
+      showToast("อัปเดตข้อมูลที่อยู่สำเร็จ!", "success");
       fetchAddresses(); // Re-fetch to ensure default status is correct
     } catch (err: any) {
-      showToast(`Error updating address: ${err.toString()}`, "error");
+      showToast(`เกิดข้อผิดพลาดในการอัปเดต: ${err.toString()}`, "error");
     }
   };
 
   const handleDelete = async (id: string) => {
     const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
+      title: "คุณแน่ใจหรือไม่?",
+      text: "คุณจะไม่สามารถย้อนกลับการกระทำนี้ได้!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonText: "ใช่, ลบเลย!",
+      cancelButtonText: "ยกเลิก",
     });
 
     if (result.isConfirmed) {
       try {
         await deleteAddress(id);
         setAddresses((prev) => prev.filter((addr) => addr.id !== id));
-        showToast("Address deleted successfully!", "success");
+        showToast("ลบที่อยู่สำเร็จ!", "success");
       } catch (err: any) {
-        showToast(`Error deleting address: ${err.toString()}`, "error");
+        showToast(`เกิดข้อผิดพลาดในการลบ: ${err.toString()}`, "error");
       }
     }
   };
@@ -133,25 +134,25 @@ const AddressesPage = () => {
       const addressToUpdate = addresses.find(addr => addr.id === id);
       if (addressToUpdate) {
         await updateAddress(id, { isDefault: true });
-        showToast("Default address updated!", "success");
+        showToast("ตั้งเป็นที่อยู่หลักเรียบร้อยแล้ว!", "success");
         fetchAddresses(); // Re-fetch to update all default statuses
       }
     } catch (err: any) {
-      showToast(`Error setting default address: ${err.toString()}`, "error");
+      showToast(`เกิดข้อผิดพลาด: ${err.toString()}`, "error");
     }
   };
 
   if (loading || userLoading) { // Check both component loading and user context loading
     return (
       <div className="text-center py-20 text-gray-600 text-lg">
-        Loading addresses...
+        กำลังโหลดข้อมูลที่อยู่...
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-20 text-red-500 text-lg">Error: {error}</div>
+      <div className="text-center py-20 text-red-500 text-lg">เกิดข้อผิดพลาด: {error}</div>
     );
   }
 
@@ -472,7 +473,7 @@ const AddressesPage = () => {
                           className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
                           title="ตั้งเป็นที่อยู่เริ่มต้น"
                         >
-                          <CheckCircle className="w-4 h-4 mr-1" /> Default
+                          <CheckCircle className="w-4 h-4 mr-1" /> ค่าเริ่มต้น
                         </button>
                       )}
                       <button
@@ -492,14 +493,14 @@ const AddressesPage = () => {
                         className="text-indigo-600 hover:text-indigo-900 text-sm flex items-center"
                         title="แก้ไขที่อยู่"
                       >
-                        <Edit2 className="w-4 h-4 mr-1" /> Edit
+                        <Edit2 className="w-4 h-4 mr-1" /> แก้ไข
                       </button>
                       <button
                         onClick={() => handleDelete(address.id)}
                         className="text-red-600 hover:text-red-900 text-sm flex items-center"
                         title="ลบที่อยู่"
                       >
-                        <Trash2 className="w-4 h-4 mr-1" /> Delete
+                        <Trash2 className="w-4 h-4 mr-1" /> ลบ
                       </button>
                     </div>
                   </div>

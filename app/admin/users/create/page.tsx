@@ -41,12 +41,12 @@ const AdminUserCreatePage = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Create New User</h1>
+      <h1 className="text-3xl font-bold mb-6">สร้างผู้ใช้งานใหม่</h1>
       <form onSubmit={handleSubmit} className="bg-white p-4 rounded-md shadow-none border border-gray-200 max-w-lg mx-auto">
 
         <div className="mb-4">
           <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">
-            Username:
+            ชื่อผู้ใช้งาน:
           </label>
           <input
             type="text"
@@ -61,7 +61,7 @@ const AdminUserCreatePage = () => {
 
         <div className="mb-4">
           <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
-            Email:
+            อีเมล:
           </label>
           <input
             type="email"
@@ -76,7 +76,7 @@ const AdminUserCreatePage = () => {
 
         <div className="mb-4">
           <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">
-            Password:
+            รหัสผ่าน:
           </label>
           <input
             type="password"
@@ -91,7 +91,7 @@ const AdminUserCreatePage = () => {
 
         <div className="mb-6">
           <label htmlFor="role" className="block text-gray-700 text-sm font-bold mb-2">
-            Role:
+            บทบาท:
           </label>
           <select
             id="role"
@@ -100,8 +100,8 @@ const AdminUserCreatePage = () => {
             onChange={handleChange}
             className="border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
-            <option value="USER">USER</option>
-            <option value="ADMIN">ADMIN</option>
+            <option value="USER">ผู้ใช้งาน (USER)</option>
+            <option value="ADMIN">ผู้ดูแลระบบ (ADMIN)</option>
           </select>
         </div>
 
@@ -111,7 +111,7 @@ const AdminUserCreatePage = () => {
             className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50"
             disabled={loading}
           >
-            {loading ? "Creating..." : "Create User"}
+            {loading ? "กำลังสร้าง..." : "สร้างผู้ใช้งาน"}
           </button>
           <button
             type="button"
@@ -119,7 +119,7 @@ const AdminUserCreatePage = () => {
             className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50"
             disabled={loading}
           >
-            Cancel
+            ยกเลิก
           </button>
         </div>
       </form>

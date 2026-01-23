@@ -3,15 +3,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Product, CreateProductPayload } from "@/types/product"; // Import CreateProductPayload
+import { CreateProductPayload } from "@/types/product"; 
 import { createProduct } from "@/lib/api/admin/products";
 import { useToast } from "@/components/ui/Toast/ToastProvider";
 import { getAllCategories } from "@/lib/api/admin/categories";
 import { Category } from "@/types/category";
-import { ArrowLeft, Upload, X, } from "lucide-react";
+import { ArrowLeft, Upload, X, Plus } from "lucide-react";
 
 const AdminProductCreatePage = () => {
   const router = useRouter();
+  const { showToast } = useToast();
   const [formData, setFormData] = useState<CreateProductPayload>({
     name: "",
     description: "",
@@ -23,8 +24,9 @@ const AdminProductCreatePage = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [selectedGalleryFiles, setSelectedGalleryFiles] = useState<File[]>([]);
+  const [galleryPreviewUrls, setGalleryPreviewUrls] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const { showToast } = useToast();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -42,6 +44,21 @@ const AdminProductCreatePage = () => {
     };
     fetchCategories();
   }, [showToast]);
+
+  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setSelectedGalleryFiles((prev) => [...prev, ...newFiles]);
+      const newUrls = newFiles.map((file) => URL.createObjectURL(file));
+      setGalleryPreviewUrls((prev) => [...prev, ...newUrls]);
+    }
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setSelectedGalleryFiles((prev) => prev.filter((_, i) => i !== index));
+    setGalleryPreviewUrls((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, files } = e.target as any;
@@ -77,6 +94,15 @@ const AdminProductCreatePage = () => {
       formDataToSend.append("name", formData.name);
       formDataToSend.append("description", formData.description);
       formDataToSend.append("price", formData.price.toString());
+      if (formData.originalPrice !== undefined) {
+        formDataToSend.append("originalPrice", formData.originalPrice.toString());
+      }
+      if (formData.promotionStart) {
+        formDataToSend.append("promotionStart", formData.promotionStart);
+      }
+      if (formData.promotionEnd) {
+        formDataToSend.append("promotionEnd", formData.promotionEnd);
+      }
       formDataToSend.append("stock", formData.stock.toString());
       formDataToSend.append("categoryId", formData.categoryId);
 
@@ -87,6 +113,10 @@ const AdminProductCreatePage = () => {
         setLoading(false);
         return;
       }
+
+      selectedGalleryFiles.forEach((file) => {
+        formDataToSend.append("images", file);
+      });
       
       await createProduct(formDataToSend);
       showToast("สร้างสินค้าสำเร็จ!", "success");
@@ -159,7 +189,7 @@ const AdminProductCreatePage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                  ราคา (บาท) <span className="text-red-500">*</span>
+                  ราคาขาย (บาท) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -176,6 +206,62 @@ const AdminProductCreatePage = () => {
               </div>
 
               <div>
+                <label htmlFor="originalPrice" className="block text-sm font-medium text-gray-700 mb-2">
+                  ราคาปกติ (ถ้ามีลดราคา)
+                </label>
+                <input
+                  type="number"
+                  id="originalPrice"
+                  name="originalPrice"
+                  value={formData.originalPrice || ""}
+                  onChange={handleChange}
+                  step="0.01"
+                  min="0"
+                  className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition-colors"
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+
+            {/* Promotion Dates */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="promotionStart" className="block text-sm font-medium text-gray-700 mb-2">
+                  วันที่เริ่มโปรโมชั่น
+                </label>
+                <input
+                  type="date"
+                  id="promotionStart"
+                  name="promotionStart"
+                  value={formData.promotionStart ? formData.promotionStart.substring(0, 10) : ""}
+                  onChange={(e) => {
+                    const val = e.target.value ? new Date(e.target.value + "T00:00:00Z").toISOString() : null;
+                    setFormData(prev => ({ ...prev, promotionStart: val }));
+                  }}
+                  className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="promotionEnd" className="block text-sm font-medium text-gray-700 mb-2">
+                  วันที่สิ้นสุดโปรโมชั่น
+                </label>
+                <input
+                  type="date"
+                  id="promotionEnd"
+                  name="promotionEnd"
+                  value={formData.promotionEnd ? formData.promotionEnd.substring(0, 10) : ""}
+                  onChange={(e) => {
+                    const val = e.target.value ? new Date(e.target.value + "T23:59:59Z").toISOString() : null;
+                    setFormData(prev => ({ ...prev, promotionEnd: val }));
+                  }}
+                  className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
                 <label htmlFor="stock" className="block text-sm font-medium text-gray-700 mb-2">
                   จำนวนสต็อก <span className="text-red-500">*</span>
                 </label>
@@ -191,28 +277,26 @@ const AdminProductCreatePage = () => {
                   required
                 />
               </div>
-            </div>
-
-            {/* Category */}
-            <div>
-              <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-2">
-                หมวดหมู่ <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="categoryId"
-                name="categoryId"
-                value={formData.categoryId}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition-colors appearance-none bg-white"
-                required
-              >
-                <option value="">เลือกหมวดหมู่</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+              <div>
+                <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-2">
+                  หมวดหมู่ <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="categoryId"
+                  name="categoryId"
+                  value={formData.categoryId}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition-colors appearance-none bg-white"
+                  required
+                >
+                  <option value="">เลือกหมวดหมู่</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Image Upload */}
@@ -258,6 +342,48 @@ const AdminProductCreatePage = () => {
                   </button>
                 </div>
               )}
+            </div>
+
+            {/* Gallery Images Upload */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                รูปภาพเพิ่มเติม (หลายมุมมอง)
+              </label>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                {galleryPreviewUrls.map((url, index) => (
+                  <div key={index} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                    <Image 
+                      src={url} 
+                      alt={`Gallery Preview ${index}`} 
+                      fill
+                      className="object-contain"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryImage(index)}
+                      className="absolute top-1 right-1 p-1 bg-white/80 rounded-full shadow-sm hover:bg-white transition-colors"
+                    >
+                      <X className="w-3 h-3 text-gray-600" />
+                    </button>
+                  </div>
+                ))}
+                
+                {galleryPreviewUrls.length < 10 && (
+                  <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition-colors">
+                    <Plus className="w-6 h-6 text-gray-400" />
+                    <span className="text-[10px] text-gray-500 mt-1">เพิ่มรูป</span>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleGalleryChange}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+              </div>
+              <p className="text-xs text-gray-500">สามารถเพิ่มได้สูงสุด 10 รูป</p>
             </div>
           </div>
 

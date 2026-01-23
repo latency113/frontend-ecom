@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getOrderById, cancelOrder } from "@/lib/api/orders";
 import { Order } from "@/types/order";
+import BillModal from "@/components/order/BillModal";
 import Swal from "sweetalert2";
 import {
   ArrowLeft,
@@ -12,6 +13,8 @@ import {
   Truck,
   Package,
   Star,
+  CheckCircle2,
+  Printer,
 } from "lucide-react";
 
 const OrderDetailPage = () => {
@@ -23,6 +26,7 @@ const OrderDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cancellingOrder, setCancellingOrder] = useState(false);
+  const [isBillOpen, setIsBillOpen] = useState(false);
 
   const handleCancelOrder = async () => {
     if (!order) return;
@@ -127,24 +131,24 @@ const OrderDetailPage = () => {
   const dynamicSteps = [
     {
       icon: FileText,
-      label: "มีคำสั่งซื้อใหม่",
+      label: "สั่งซื้อสำเร็จ",
       date: orderDate,
       status: "PENDING",
     },
     {
       icon: CreditCard,
-      label: "ข้อมูลการชำระเงินได้รับการยืนยันแล้ว",
+      label: order.paymentMethod === "COD" ? "ยืนยันรายการสั่งซื้อ" : "ชำระเงินสำเร็จ",
       date:
         order.status === "PROCESSING" ||
         order.status === "SHIPPED" ||
         order.status === "DELIVERED"
           ? updatedDate
-          : "",
+          : (order.status === "PENDING" && order.paymentMethod !== "COD" ? "รอการตรวจสอบสลิป" : ""),
       status: "PROCESSING",
     },
     {
       icon: Truck,
-      label: "ที่ต้องจัดส่ง",
+      label: "กำลังจัดส่ง",
       date:
         order.status === "SHIPPED" || order.status === "DELIVERED"
           ? updatedDate
@@ -153,25 +157,25 @@ const OrderDetailPage = () => {
     },
     {
       icon: Package,
-      label: "ที่ต้องได้รับ",
+      label: "ได้รับสินค้าแล้ว",
       date: order.status === "DELIVERED" ? updatedDate : "",
-      status: "DELIVERED",
-    },
-    {
-      icon: Star,
-      label: "ให้คะแนน",
-      date: "",
       status: "DELIVERED",
     },
   ];
 
-  const currentStepIndex = dynamicSteps.findIndex(
-    (step) => step.status === order.status
-  );
-
-  // Adjust currentStepIndex for "DELIVERED" to light up all steps before "ให้คะแนน"
-  const actualCurrentStepIndex =
-    order.status === "DELIVERED" ? dynamicSteps.length - 2 : currentStepIndex;
+  // Logic to determine which step is active
+  let actualCurrentStepIndex = 0;
+  if (order.status === "PENDING") {
+    actualCurrentStepIndex = 0;
+  } else if (order.status === "PROCESSING") {
+    actualCurrentStepIndex = 1;
+  } else if (order.status === "SHIPPED") {
+    actualCurrentStepIndex = 2;
+  } else if (order.status === "DELIVERED") {
+    actualCurrentStepIndex = 3;
+  } else if (order.status === "CANCELLED") {
+    actualCurrentStepIndex = -1;
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -191,7 +195,16 @@ const OrderDetailPage = () => {
               </span>
               <span className="text-gray-400">|</span>
               <span className="text-sm font-medium text-blue-600">
-                {order.status}
+                 {(() => {
+                    switch (order.status) {
+                      case "PENDING": return order.paymentMethod === "COD" ? "รอยืนยัน" : "รอตรวจสอบการชำระเงิน";
+                      case "PROCESSING": return "กำลังเตรียมจัดส่ง";
+                      case "SHIPPED": return "อยู่ระหว่างการจัดส่ง";
+                      case "DELIVERED": return "จัดส่งสำเร็จ";
+                      case "CANCELLED": return "ยกเลิกแล้ว";
+                      default: return order.status;
+                    }
+                 })()}
               </span>
             </div>
           </div>
@@ -200,98 +213,108 @@ const OrderDetailPage = () => {
 
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         {/* Progress Steps */}
-        <div className="bg-white rounded-lg p-6 mb-4 overflow-hidden">
-          <div className="relative mb-8 overflow-x-auto pb-4 no-scrollbar">
-            {/* Background line container to ensure min-width */}
-            <div className="min-w-[500px] relative"> 
-              {/* Background line */}
-              <div
-                className="absolute top-6 left-0 right-0 h-0.5 bg-gray-300"
-                style={{
-                  left: `calc(50% / ${dynamicSteps.length})`,
-                  right: `calc(50% / ${dynamicSteps.length})`,
-                }}
-              />
+        <div className="bg-white rounded-lg p-6 mb-4 overflow-hidden shadow-sm">
+          {order.status === "CANCELLED" ? (
+            <div className="flex flex-col items-center py-10 text-red-500">
+               <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-4 border border-red-100">
+                 <FileText size={40} />
+               </div>
+               <h3 className="text-2xl font-bold">คำสั่งซื้อนี้ถูกยกเลิกแล้ว</h3>
+               <p className="text-gray-500 mt-2">รายการนี้จะไม่ถูกดำเนินการต่อ หากมีข้อสงสัยโปรดติดต่อเรา</p>
+            </div>
+          ) : (
+            <div className="relative mb-8 overflow-x-auto pb-4 no-scrollbar">
+              {/* Background line container to ensure min-width */}
+              <div className="min-w-[600px] relative pt-2"> 
+                {/* Background line (Gray) */}
+                <div
+                  className="absolute top-8 left-0 right-0 h-1 bg-gray-100 rounded-full"
+                  style={{
+                    left: `calc(100% / ${dynamicSteps.length * 2})`,
+                    right: `calc(100% / ${dynamicSteps.length * 2})`,
+                  }}
+                />
 
-              {/* Active line overlay */}
-              <div
-                className="absolute top-6 left-0 h-0.5 bg-green-500 transition-all duration-500"
-                style={{
-                  left: `calc(50% / ${dynamicSteps.length})`,
-                  width: `calc((100% - 100% / ${
-                    dynamicSteps.length
-                  } * 2) * ${actualCurrentStepIndex} / ${
-                    dynamicSteps.length - 1
-                  })`,
-                }}
-              />
+                {/* Active line overlay (Green) */}
+                <div
+                  className="absolute top-8 left-0 h-1 bg-green-500 transition-all duration-700 ease-in-out rounded-full"
+                  style={{
+                    left: `calc(100% / ${dynamicSteps.length * 2})`,
+                    width: actualCurrentStepIndex > 0 
+                      ? `calc((100% / ${dynamicSteps.length} * ${actualCurrentStepIndex}) - (100% / ${dynamicSteps.length * 2}))`
+                      : "0%",
+                  }}
+                />
 
-              <div className="flex items-start justify-between relative">
-                {dynamicSteps.map((step, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col items-center relative"
-                    style={{ flex: 1 }}
-                  >
-                    {/* Circle icon */}
-                    <div
-                      className={`relative z-10 w-12 h-12 rounded-full flex items-center justify-center mb-2 flex-shrink-0 ${
-                        index <= actualCurrentStepIndex
-                          ? "bg-green-500 text-white"
-                          : "bg-gray-200 text-gray-400"
-                      }`}
-                    >
-                      <step.icon className="w-6 h-6" />
-                    </div>
+                <div className="flex items-start justify-between relative">
+                  {dynamicSteps.map((step, index) => {
+                    const isActive = index <= actualCurrentStepIndex;
+                    const isCompleted = index < actualCurrentStepIndex;
+                    const isCurrent = index === actualCurrentStepIndex;
 
-                    {/* Label */}
-                    <p
-                      className={`text-xs text-center max-w-[100px] sm:max-w-[120px] ${
-                        index <= actualCurrentStepIndex
-                          ? "text-gray-900 font-medium"
-                          : "text-gray-500"
-                      }`}
-                    >
-                      {step.label}
-                    </p>
-                    {step.date && (
-                      <p className="text-xs text-gray-400 mt-1 whitespace-nowrap">{step.date}</p>
-                    )}
-                  </div>
-                ))}
+                    return (
+                      <div
+                        key={index}
+                        className="flex flex-col items-center relative"
+                        style={{ flex: 1 }}
+                      >
+                        {/* Circle icon */}
+                        <div
+                          className={`relative z-10 w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-all duration-500 border-4 ${
+                            isActive
+                              ? "bg-green-500 border-green-100 text-white shadow-lg shadow-green-500/20 scale-110"
+                              : "bg-white border-gray-100 text-gray-300 shadow-inner"
+                          }`}
+                        >
+                          <step.icon className={`w-6 h-6 ${isCurrent ? "animate-pulse" : ""}`} />
+                          
+                          {isCompleted && (
+                            <div className="absolute -right-1 -top-1 bg-white rounded-full p-0.5 shadow-md">
+                               <div className="bg-green-500 rounded-full p-1">
+                                 <CheckCircle2 className="w-3 h-3 text-white" />
+                               </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Label */}
+                        <div className="text-center px-2">
+                          <p
+                            className={`text-sm font-bold transition-colors duration-500 ${
+                              isActive ? "text-gray-900" : "text-gray-400"
+                            }`}
+                          >
+                            {step.label}
+                          </p>
+                          {step.date ? (
+                            <p className="text-[11px] text-gray-400 mt-1 font-medium bg-gray-50 px-2 py-0.5 rounded-full inline-block">
+                              {step.date}
+                            </p>
+                          ) : isCurrent && order.status === "PENDING" && order.paymentMethod !== "COD" ? (
+                             <p className="text-[10px] text-blue-500 mt-1 font-bold animate-pulse">
+                               รอยืนยันสลิป
+                             </p>
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Delivery Info
-          <div className="bg-blue-50 rounded p-4 text-sm text-gray-700">
-            <p className="mb-1">
-              {order.status === "DELIVERED"
-                ? `สินค้าของคุณถูกจัดส่งเมื่อ ${new Date(
-                    order.updatedAt
-                  ).toLocaleDateString("th-TH")} และได้รับแล้ว`
-                : `คุณจะได้รับสินค้าประมาณวันที่ ${new Date(
-                    order.createdAt
-                  ).toLocaleDateString("th-TH", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  })} + 3-5 วันทำการ`}{" "}
-              กรุณาชำระเงินทันตามคำสั่งซื้อแล้วได้รับสินค้าแล้ว
-            </p>
-            <p className="text-gray-600">
-              ⓘ การคืนสินค้าสินค้า: รับได้สูงสุด ฿30 หากไม่ได้รับสินค้าภายใน
-              07-01-2026{" "}
-              <button className="text-blue-600 hover:underline">
-                ดูเพิ่มเติม
-              </button>
-            </p>
-          </div> */}
+          )}
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-2 mt-4">
-            <button className="px-6 py-2 text-sm text-gray-700 border border-gray-300 rounded hover:bg-gray-50">
-              ติดต่อผู้ขาย
+          <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-50">
+            <button 
+              onClick={() => setIsBillOpen(true)}
+              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-blue-600 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors shadow-sm"
+            >
+              <Printer className="w-4 h-4" />
+              <span>พิมพ์ใบแจ้งหนี้</span>
+            </button>
+            <button className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
+              ติดต่อฝ่ายบริการลูกค้า
             </button>
             <button
               onClick={handleCancelOrder}
@@ -299,7 +322,7 @@ const OrderDetailPage = () => {
                 (order.status !== "PENDING" && order.status !== "PROCESSING") ||
                 cancellingOrder
               }
-              className="px-6 py-2 text-sm text-gray-700 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
             >
               {cancellingOrder ? "กำลังยกเลิก..." : "ยกเลิกคำสั่งซื้อ"}
             </button>
@@ -313,23 +336,10 @@ const OrderDetailPage = () => {
             <div className="flex flex-col gap-2 text-sm">
               <div className="flex gap-2">
                 <Package className="w-5 h-5 text-green-500" />
-                <span className="font-medium">
-                  {new Date(order.createdAt).toLocaleDateString("th-TH", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                  })}
-                </span>
+                <span className="font-medium">ข้อมูลการจัดส่ง</span>
               </div>
               <div className="text-sm text-gray-700">
-                {order.address.street}
-                {order.address.city ? `, ${order.address.city}` : ''}
-                {order.address.stateProvince ? `, ${order.address.stateProvince}` : ''}
-                {order.address.postalCode ? ` ${order.address.postalCode}` : ''}
-                {order.address.country ? `, ${order.address.country}` : ''}
+                {order.address}
               </div>
             </div>
             <div className="flex">
@@ -346,34 +356,34 @@ const OrderDetailPage = () => {
 
                     switch (order.status) {
                       case "PENDING":
-                        statusText = "กำลังรอชำระเงิน";
+                        statusText = "กำลังรอการยืนยัน";
                         bgColor = "bg-yellow-500";
-                        textColor = "text-yellow-600";
                         break;
                       case "PROCESSING":
-                        statusText = "กำลังดำเนินการจัดส่ง";
-                        bgColor = "bg-blue-500";
-                        textColor = "text-blue-600";
+                        if (order.paymentMethod !== "COD") {
+                          statusText = "ชำระเงินแล้ว (รอตรวจสอบ)";
+                          bgColor = "bg-blue-500";
+                        } else {
+                          statusText = "กำลังเตรียมจัดส่ง";
+                          bgColor = "bg-blue-600";
+                        }
                         break;
                       case "SHIPPED":
                         statusText = "สินค้ากำลังจัดส่ง";
                         bgColor = "bg-purple-500";
-                        textColor = "text-purple-600";
                         break;
                       case "DELIVERED":
                         statusText = "สินค้าถูกจัดส่งสำเร็จ";
                         bgColor = "bg-green-500";
-                        textColor = "text-green-600";
                         break;
                       case "CANCELLED":
                         statusText = "คำสั่งซื้อถูกยกเลิก";
                         bgColor = "bg-red-500";
-                        textColor = "text-red-600";
                         break;
                       default:
                         statusText = "สถานะไม่ระบุ";
                         break;
-                    }
+                    } 
 
                     return (
                       <>
@@ -464,14 +474,50 @@ const OrderDetailPage = () => {
               </span>
             </div>
           </div>
-          <div className="mt-4 pt-4 border-t">
-            <p className="text-sm text-gray-600">ช่องทางการชำระเงิน</p>
-            <p className="text-sm text-gray-900 font-medium mt-1">
-              เก็บเงินปลายทาง
-            </p>
+          <div className="mt-4 pt-4 border-t grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-600">ช่องทางการชำระเงิน</p>
+              <p className="text-sm text-gray-900 font-medium mt-1">
+                {order.paymentMethod === "COD" ? "เก็บเงินปลายทาง" : 
+                 order.paymentMethod === "QR" ? "พร้อมเพย์ / QR Code" : 
+                 "บัตรเครดิต/เดบิต"}
+              </p>
+            </div>
+            {order.paymentSlip && (
+              <div>
+                <p className="text-sm text-gray-600 mb-2">หลักฐานการชำระเงิน</p>
+                {(() => {
+                  const slipUrl = order.paymentSlip.startsWith('http') 
+                    ? order.paymentSlip 
+                    : `${process.env.NEXT_PUBLIC_API_BASE_URL?.replace('/api/v1', '')}${order.paymentSlip}`;
+                  
+                  return (
+                    <div className="relative w-32 h-48 border rounded-lg overflow-hidden bg-gray-100 group cursor-pointer"
+                         onClick={() => window.open(slipUrl, '_blank')}>
+                       <img 
+                        src={slipUrl} 
+                        alt="Payment Slip" 
+                        className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                       />
+                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                         <span className="text-white text-xs font-bold">ดูรูปขยาย</span>
+                       </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </div>
         </div>
       </div>
+      
+      {order && (
+        <BillModal 
+          order={order} 
+          isOpen={isBillOpen} 
+          onClose={() => setIsBillOpen(false)} 
+        />
+      )}
     </div>
   );
 };

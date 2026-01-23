@@ -10,7 +10,6 @@ export const uploadImage = async (file: File): Promise<string> => {
         "Content-Type": "multipart/form-data",
       },
     });
-    console.log("Frontend fileUpload.ts: Backend response for image upload:", response.data);
     return response.data.imageUrl; // Assuming the backend returns { imageUrl: "..." }
   } catch (error: any) {
     throw error.response?.data?.message || error.message;

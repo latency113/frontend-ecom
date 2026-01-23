@@ -199,6 +199,30 @@ const AdminOrderEditPage = () => {
           </div>
         </div>
 
+        {/* Payment Slip Card */}
+        {order.paymentSlip && (
+          <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+            <h2 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-blue-500" />
+              หลักฐานการชำระเงิน
+            </h2>
+            <div className="relative w-full max-w-sm mx-auto aspect-[3/4] bg-gray-50 rounded-lg overflow-hidden border border-gray-100 group cursor-pointer"
+                 onClick={() => window.open(order.paymentSlip!.startsWith('http') ? order.paymentSlip! : `${process.env.NEXT_PUBLIC_API_BASE_URL?.replace('/api/v1', '')}${order.paymentSlip}`, '_blank')}>
+              <img 
+                src={order.paymentSlip.startsWith('http') ? order.paymentSlip : `${process.env.NEXT_PUBLIC_API_BASE_URL?.replace('/api/v1', '')}${order.paymentSlip}`} 
+                alt="Payment Slip" 
+                className="w-full h-full object-contain transition-transform group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="text-white text-sm font-bold bg-black/20 px-4 py-2 rounded-full backdrop-blur-sm border border-white/30">คลิกเพื่อดูรูปขยาย</span>
+              </div>
+            </div>
+            <p className="text-center text-xs text-gray-500 mt-3 italic">
+              * โปรดตรวจสอบความถูกต้องของยอดเงินและวันที่ในสลิปก่อนกดยืนยันสถานะ
+            </p>
+          </div>
+        )}
+
         {/* Order Items Card */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">

@@ -4,12 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Cart } from "@/types/cart";
 import { getCartByUserId, clearCart } from "@/lib/api/cart";
-import { createOrder } from "@/lib/api/orders";
+import { createOrder, uploadSlip } from "@/lib/api/orders";
 import { useUser } from "@/lib/context/UserContext";
 import Link from "next/link";
+import Image from "next/image";
 import { getAddressesByUserId } from "@/lib/api/address"; // Import address API
 import { Address } from "@/types/address"; // Import Address type
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, QrCode, CreditCard, Truck, Camera, Upload, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast/ToastProvider"; // Import useToast
 
 const CheckoutPage = () => {
@@ -21,8 +22,22 @@ const CheckoutPage = () => {
   const [loadingCart, setLoadingCart] = useState(true);
   const [errorCart, setErrorCart] = useState<string | null>(null);
   const [isProcessingOrder, setIsProcessingOrder] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"COD" | "CARD">("COD"); // Default to Cash On Delivery
+  const [paymentMethod, setPaymentMethod] = useState<"COD" | "CARD" | "QR">("COD"); // Default to Cash On Delivery
+  const [slipFile, setSlipFile] = useState<File | null>(null);
+  const [slipPreview, setSlipPreview] = useState<string | null>(null);
   const router = useRouter();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSlipFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSlipPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const { user, loading: loadingUser, error: userError } = useUser();
   const { showToast } = useToast(); // Destructure showToast here
@@ -67,15 +82,21 @@ const CheckoutPage = () => {
 
   const handlePlaceOrder = async () => {
     if (!user?.id) {
-      setErrorCart("User not authenticated. Please log in to place an order.");
+      setErrorCart("กรุณาเข้าสู่ระบบเพื่อสั่งซื้อสินค้า");
       return;
     }
     if (!cart || cart.cartItems.length === 0) {
-      setErrorCart("Your cart is empty. Please add items before checking out.");
+      setErrorCart("ตะกร้าสินค้าว่างเปล่า กรุณาเลือกสินค้าก่อน");
       return;
     }
     if (!selectedAddressId) {
-      setErrorCart("Please select a shipping address.");
+      setErrorCart("กรุณาเลือกที่อยู่สำหรับการจัดส่ง");
+      return;
+    }
+
+    if (paymentMethod === "QR" && !slipFile) {
+      setErrorCart("โปรดอัปโหลดสลิปการโอนเงินเพื่อยืนยันการสั่งซื้อ");
+      showToast("โปรดอัปโหลดสลิปการโอนเงิน", "error");
       return;
     }
 
@@ -87,7 +108,7 @@ const CheckoutPage = () => {
         (addr) => addr.id === selectedAddressId
       );
       if (!selectedAddress) {
-        throw new Error("Selected address not found.");
+        throw new Error("ไม่พบที่อยู่จัดส่งที่เลือก");
       }
       
       const orderItemsPayload = cart.cartItems.map((item) => ({
@@ -96,17 +117,27 @@ const CheckoutPage = () => {
         price: item.product.price, // Capture current price at the time of order
       }));
 
+      let paymentSlipUrl = null;
+      if (paymentMethod === "QR" && slipFile) {
+        showToast("กำลังอัปโหลดสลิปการโอนเงิน...", "info");
+        paymentSlipUrl = await uploadSlip(slipFile);
+        showToast("อัปโหลดสลิปสำเร็จ", "success");
+      }
+
       const newOrder = await createOrder(
         user.id,
         orderItemsPayload,
-        selectedAddressId
-      ); // Pass addressId
+        selectedAddressId,
+        paymentMethod,
+        paymentSlipUrl
+      ); 
       console.log("Order placed successfully:", newOrder);
 
       // Clear the cart after successful order
       await clearCart(cart.id);
       window.dispatchEvent(new Event("cartUpdated")); // Notify Header to update cart count
 
+      showToast("สั่งซื้อสินค้าสำเร็จ!", "success");
       router.push(`/orders/success?orderId=${newOrder.id}`); // Redirect to order success page
     } catch (err: any) {
       console.error("Error placing order:", err);
@@ -121,7 +152,7 @@ const CheckoutPage = () => {
   if (loadingUser || loadingCart) {
     return (
       <div className="text-center py-20 text-gray-600 text-lg">
-        Loading checkout...
+        กำลังโหลดข้อมูลการชำระเงิน...
       </div>
     );
   }
@@ -129,7 +160,7 @@ const CheckoutPage = () => {
   if (userError || errorCart) {
     return (
       <div className="text-center py-20 text-red-500 text-lg">
-        Error: {userError || errorCart}
+        เกิดข้อผิดพลาด: {userError || errorCart}
       </div>
     );
   }
@@ -138,13 +169,13 @@ const CheckoutPage = () => {
     return (
       <div className="text-center py-20">
         <p className="text-xl text-gray-700 mb-6">
-          Please log in to proceed to checkout.
+          กรุณาเข้าสู่ระบบเพื่อดำเนินการชำระเงิน
         </p>
         <Link
           href="/login"
           className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          Login
+          เข้าสู่ระบบ
         </Link>
       </div>
     );
@@ -196,7 +227,7 @@ const CheckoutPage = () => {
             </div>
           ))}
           <div className="flex justify-between items-center py-4 text-xl font-extrabold text-gray-900">
-            <span>Total:</span>
+            <span>ยอดรวมทั้งสิ้น:</span>
             <span>
               {calculateTotal().toLocaleString("th-TH", {
                 style: "currency",
@@ -210,7 +241,7 @@ const CheckoutPage = () => {
 
         <div className="lg:w-1/3 bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-xl border border-gray-100 mt-8 lg:mt-0">
           <h2 className="text-2xl font-extrabold text-gray-900 mb-6">
-            ข้อมูลการชำระเงินและที่อยู่จัดส่ง
+            สรุปการสั่งซื้อ
           </h2>
           {/* Address Selection */}
           <div className="mb-6">
@@ -250,41 +281,130 @@ const CheckoutPage = () => {
             )}
           </div>
           <h2 className="text-xl font-semibold mb-4">ช่องทางการชำระเงิน</h2>
-          <div className="space-y-4">
-            <div className="flex items-center">
+          <div className="space-y-3">
+            <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all ${paymentMethod === "COD" ? "border-blue-500 bg-blue-50 shadow-sm" : "border-gray-200 hover:bg-gray-50"}`}>
               <input
                 type="radio"
-                id="cashOnDelivery"
                 name="paymentMethod"
                 value="COD"
                 checked={paymentMethod === "COD"}
                 onChange={() => setPaymentMethod("COD")}
                 className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300"
               />
-              <label
-                htmlFor="cashOnDelivery"
-                className="ml-3 block text-sm font-medium text-gray-700"
-              >
-                เก็บเงินปลายทาง (Cash On Delivery)
-              </label>
-            </div>
-            <div className="flex items-center">
+              <div className="ml-3 flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600">
+                  <Truck size={20} />
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900">เก็บเงินปลายทาง</p>
+                  <p className="text-xs text-gray-500">จ่ายเมื่อได้รับสินค้า</p>
+                </div>
+              </div>
+            </label>
+
+            <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all ${paymentMethod === "QR" ? "border-blue-500 bg-blue-50 shadow-sm" : "border-gray-200 hover:bg-gray-50"}`}>
               <input
                 type="radio"
-                id="creditCard"
+                name="paymentMethod"
+                value="QR"
+                checked={paymentMethod === "QR"}
+                onChange={() => setPaymentMethod("QR")}
+                className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300"
+              />
+              <div className="ml-3 flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                  <QrCode size={20} />
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900">พร้อมเพย์ / QR Code</p>
+                  <p className="text-xs text-gray-500">สแกนจ่ายได้ทุกธนาคาร</p>
+                </div>
+              </div>
+            </label>
+
+            <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all ${paymentMethod === "CARD" ? "border-blue-500 bg-blue-50 shadow-sm" : "border-gray-200 hover:bg-gray-50"}`}>
+              <input
+                type="radio"
                 name="paymentMethod"
                 value="CARD"
                 checked={paymentMethod === "CARD"}
                 onChange={() => setPaymentMethod("CARD")}
                 className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300"
               />
-              <label
-                htmlFor="creditCard"
-                className="ml-3 block text-sm font-medium text-gray-700"
-              >
-                บัตรเครดิต/เดบิต
-              </label>
-            </div>
+              <div className="ml-3 flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
+                  <CreditCard size={20} />
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900">บัตรเครดิต/เดบิต</p>
+                  <p className="text-xs text-gray-500">Visa, Mastercard, JCB</p>
+                </div>
+              </div>
+            </label>
+
+            {paymentMethod === "QR" && (
+              <div className="mt-6 p-6 bg-white border border-blue-100 rounded-2xl text-center shadow-inner">
+                <div className="mb-4">
+                  <p className="text-lg font-bold text-gray-900 mb-1">สแกนจ่ายผ่าน PromptPay</p>
+                  <p className="text-sm text-gray-500">ยอดชำระที่ต้องโอน: <span className="text-blue-600 font-bold">{calculateTotal().toLocaleString()} บาท</span></p>
+                </div>
+                
+                <div className="relative inline-block p-4 bg-white border-4 border-blue-600 rounded-lg mb-6 mx-auto">
+                   {/* Placeholder for QR Code */}
+                   <div className="w-48 h-48 bg-gray-50 flex flex-col items-center justify-center relative">
+                      <Image 
+                        src="/assets/facebook.png" // Using an existing asset as placeholder or a generic QR if available
+                        alt="PromptPay QR Code"
+                        width={200}
+                        height={200}
+                        className="opacity-20 grayscale"
+                      />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <QrCode size={64} className="text-blue-600 mb-2" />
+                        <p className="text-[10px] font-bold text-blue-800 uppercase tracking-widest">PromptPay</p>
+                      </div>
+                   </div>
+                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-bold">
+                     IT LIFE STORE
+                   </div>
+                </div>
+
+                <div className="space-y-4 text-left">
+                  <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                    <Camera size={18} className="text-blue-500" />
+                    อัปโหลดหลักฐานการโอนเงิน (Slip)
+                  </p>
+                  
+                  <div className="relative group">
+                    <input
+                      type="file"
+                      id="slipUpload"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <label 
+                      htmlFor="slipUpload"
+                      className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all ${slipPreview ? "border-green-500 bg-green-50" : "border-gray-300 bg-gray-50 hover:border-blue-400 group-hover:bg-blue-50"}`}
+                    >
+                      {slipPreview ? (
+                        <div className="relative w-full h-full flex items-center justify-center">
+                          <img src={slipPreview} alt="Slip preview" className="h-full object-contain rounded-lg py-2" />
+                          <div className="absolute top-2 right-2 bg-green-500 text-white p-1 rounded-full">
+                            <CheckCircle2 size={16} />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Upload size={24} className="text-gray-400 mb-2" />
+                          <p className="text-xs text-gray-500">คลิกเพื่ออัปโหลดรูปภาพสลิป</p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {paymentMethod === "CARD" && (
               <div className="space-y-4 pt-4 border-t border-gray-200 mt-4">
@@ -296,13 +416,13 @@ const CheckoutPage = () => {
                     htmlFor="cardName"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Card Holder Name
+                    ชื่อบนหน้าบัตร
                   </label>
                   <input
                     type="text"
                     id="cardName"
                     className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="John Doe"
+                    placeholder="ภาษาอังกฤษ (เช่น SOMCHAI DEE)"
                   />
                 </div>
                 <div>
@@ -310,7 +430,7 @@ const CheckoutPage = () => {
                     htmlFor="cardNumber"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Card Number
+                    หมายเลขบัตร
                   </label>
                   <input
                     type="text"
@@ -325,7 +445,7 @@ const CheckoutPage = () => {
                       htmlFor="expiry"
                       className="block text-sm font-medium text-gray-700 mb-1"
                     >
-                      Expiry Date
+                      วันหมดอายุ (ดด/ปป)
                     </label>
                     <input
                       type="text"
@@ -339,7 +459,7 @@ const CheckoutPage = () => {
                       htmlFor="cvv"
                       className="block text-sm font-medium text-gray-700 mb-1"
                     >
-                      CVV
+                      CVV / CVC
                     </label>
                     <input
                       type="text"

@@ -7,4 +7,7 @@ export interface Review {
   createdAt: string;
   updatedAt: string;
   userName?: string; // Optional, if you want to display user's name with review
+  user?: {
+    username: string;
+  };
 }

@@ -18,6 +18,21 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { showToast } = useToast();
   const [addToCartLoading, setAddToCartLoading] = useState(false);
 
+  const isPromotionActive = () => {
+    if (!product.originalPrice || product.originalPrice <= product.price) return false;
+    
+    const now = new Date();
+    const start = product.promotionStart ? new Date(product.promotionStart) : null;
+    const end = product.promotionEnd ? new Date(product.promotionEnd) : null;
+
+    if (start && now < start) return false;
+    if (end && now > end) return false;
+    
+    return true;
+  };
+
+  const activePromotion = isPromotionActive();
+
   const handleAddToCart = async (event: React.MouseEvent) => {
     event.preventDefault(); // Prevent default link navigation
     event.stopPropagation(); // Stop event propagation to the parent Link
@@ -74,6 +89,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
               No Image
             </div>
           )}
+          
+          {/* Discount Badge */}
+          {activePromotion && (
+            <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+              ลด {Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)}%
+            </div>
+          )}
         </div>
 
         {/* Product Info */}
@@ -86,14 +108,26 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </p>
           
           <div className="mt-auto">
-            <p className="text-base sm:text-lg font-bold text-blue-600 mb-3">
-              {product.price.toLocaleString("th-TH", {
-                currency: "thb",
-                style: "currency",
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              })}
-            </p>
+            <div className="flex flex-col mb-2">
+              <p className="text-base sm:text-lg font-bold text-blue-600">
+                {(activePromotion ? product.price : (product.originalPrice || product.price)).toLocaleString("th-TH", {
+                  currency: "thb",
+                  style: "currency",
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })}
+              </p>
+              {activePromotion && (
+                <p className="text-[10px] sm:text-xs text-gray-400 line-through">
+                  {product.originalPrice!.toLocaleString("th-TH", {
+                    currency: "thb",
+                    style: "currency",
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  })}
+                </p>
+              )}
+            </div>
 
             {product.stock > 0 ? (
               <button

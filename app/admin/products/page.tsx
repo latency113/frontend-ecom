@@ -268,9 +268,30 @@ const AdminProductListPage = () => {
                       </td>
 
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm font-medium text-gray-900">
-                          ฿{product.price.toLocaleString()}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-gray-900">
+                            ฿{product.price.toLocaleString()}
+                          </span>
+                          {product.originalPrice && product.originalPrice > product.price && (
+                            <div className="flex flex-col gap-1 mt-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-gray-400 line-through">
+                                  ฿{product.originalPrice.toLocaleString()}
+                                </span>
+                                <span className="text-[10px] bg-red-100 text-red-600 font-bold px-1.5 py-0.5 rounded">
+                                  SALE
+                                </span>
+                              </div>
+                              {(product.promotionStart || product.promotionEnd) && (
+                                <p className="text-[9px] text-gray-500 leading-tight">
+                                  {product.promotionStart && `เริ่ม: ${new Date(product.promotionStart).toLocaleDateString("th-TH")}`}
+                                  <br/>
+                                  {product.promotionEnd && `สิ้นสุด: ${new Date(product.promotionEnd).toLocaleDateString("th-TH")}`}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </td>
 
                       <td className="px-6 py-4 whitespace-nowrap">
