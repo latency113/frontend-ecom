@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useUser } from "@/lib/context/UserContext"; // Import useUser
 import { LogIn, ShoppingCart } from "lucide-react";
 import { useToast } from "@/components/ui/Toast/ToastProvider"; // Import useToast
+import Swal from "sweetalert2";
 
 const CartPage = () => {
   const [cart, setCart] = useState<Cart | null>(null);
@@ -61,9 +62,25 @@ const CartPage = () => {
 
   const handleRemoveItem = async (itemId: string) => {
     if (!user?.id) {
-      setErrorCart("User not authenticated.");
+      setErrorCart("กรุณาเข้าสู่ระบบ");
       return;
     }
+
+    const result = await Swal.fire({
+      title: "ยืนยันการลบสินค้า?",
+      text: "คุณต้องการลบสินค้านี้ออกจากตะกร้าใช่หรือไม่?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "ใช่, ลบเลย!",
+      cancelButtonText: "ยกเลิก",
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
     try {
       await deleteCartItem(itemId);
       if (cart) {
@@ -72,12 +89,12 @@ const CartPage = () => {
           cartItems: cart.cartItems.filter((item) => item.id !== itemId),
         });
       }
-      showToast("ลบสินค้าออกจากตะกร้าเสร็จสิน !", "success");
+      showToast("ลบสินค้าออกจากตะกร้าเรียบร้อยแล้ว!", "success");
     } catch (err: any) {
       console.error("Error removing cart item:", err);
       setErrorCart(err.toString());
       showToast(
-        `Error removing cart item: ${err.message || err.toString()}`,
+        `ไม่สามารถลบสินค้าได้: ${err.message || err.toString()}`,
         "error"
       ); // Error toast
     }

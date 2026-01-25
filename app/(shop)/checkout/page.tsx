@@ -7,7 +7,6 @@ import { getCartByUserId, clearCart } from "@/lib/api/cart";
 import { createOrder, uploadSlip } from "@/lib/api/orders";
 import { useUser } from "@/lib/context/UserContext";
 import Link from "next/link";
-import Image from "next/image";
 import { getAddressesByUserId } from "@/lib/api/address"; // Import address API
 import { Address } from "@/types/address"; // Import Address type
 import { ShoppingCart, QrCode, CreditCard, Truck, Camera, Upload, CheckCircle2 } from "lucide-react";
@@ -322,7 +321,7 @@ const CheckoutPage = () => {
               </div>
             </label>
 
-            <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all ${paymentMethod === "CARD" ? "border-blue-500 bg-blue-50 shadow-sm" : "border-gray-200 hover:bg-gray-50"}`}>
+            {/* <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all ${paymentMethod === "CARD" ? "border-blue-500 bg-blue-50 shadow-sm" : "border-gray-200 hover:bg-gray-50"}`}>
               <input
                 type="radio"
                 name="paymentMethod"
@@ -340,7 +339,7 @@ const CheckoutPage = () => {
                   <p className="text-xs text-gray-500">Visa, Mastercard, JCB</p>
                 </div>
               </div>
-            </label>
+            </label> */}
 
             {paymentMethod === "QR" && (
               <div className="mt-6 p-6 bg-white border border-blue-100 rounded-2xl text-center shadow-inner">
@@ -350,24 +349,29 @@ const CheckoutPage = () => {
                 </div>
                 
                 <div className="relative inline-block p-4 bg-white border-4 border-blue-600 rounded-lg mb-6 mx-auto">
-                   {/* Placeholder for QR Code */}
-                   <div className="w-48 h-48 bg-gray-50 flex flex-col items-center justify-center relative">
-                      <Image 
-                        src="/assets/facebook.png" // Using an existing asset as placeholder or a generic QR if available
+                   {/* Static QR Code Image - Made Larger */}
+                   <div className="w-64 sm:w-80 bg-white flex flex-col items-center justify-center relative">
+                      <img 
+                        src="/assets/slip_itlife.jpg"
                         alt="PromptPay QR Code"
-                        width={200}
-                        height={200}
-                        className="opacity-20 grayscale"
+                        className="w-full h-auto object-contain rounded-sm"
                       />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <QrCode size={64} className="text-blue-600 mb-2" />
-                        <p className="text-[10px] font-bold text-blue-800 uppercase tracking-widest">PromptPay</p>
-                      </div>
                    </div>
-                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-bold">
+                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-md">
                      IT LIFE STORE
                    </div>
                 </div>
+
+                <div className="bg-blue-50 p-3 rounded-lg mb-6 text-left border border-blue-100">
+                  <p className="text-xs text-blue-800 font-bold mb-1">ขั้นตอนการชำระเงิน:</p>
+                  <ol className="text-[10px] text-blue-700 space-y-1 list-decimal ml-4">
+                    <li>เปิดแอปธนาคารของคุณ</li>
+                    <li>เลือกเมนู "สแกนจ่าย"</li>
+                    <li>สแกน QR Code ด้านบน (ยอดเงินจะขึ้นอัตโนมัติ)</li>
+                    <li>เมื่อโอนสำเร็จ ให้บันทึกสลิปแล้วนำมาอัปโหลดด้านล่าง</li>
+                  </ol>
+                </div>
+
 
                 <div className="space-y-4 text-left">
                   <p className="text-sm font-bold text-gray-700 flex items-center gap-2">
@@ -406,7 +410,7 @@ const CheckoutPage = () => {
               </div>
             )}
 
-            {paymentMethod === "CARD" && (
+            {/* {paymentMethod === "CARD" && (
               <div className="space-y-4 pt-4 border-t border-gray-200 mt-4">
                 <h3 className="text-lg font-medium text-gray-900">
                   ข้อมูลบัตรเครดิต/เดบิต
@@ -470,7 +474,7 @@ const CheckoutPage = () => {
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
           {errorCart && (
             <p className="text-red-600 text-sm mt-4">{errorCart}</p>
